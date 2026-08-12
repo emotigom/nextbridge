@@ -10,7 +10,7 @@
 https://go.gomdory.com/2026-sk
 ```
 
-이 주소는 현재 행사 설정에서 `candidate`일 뿐입니다. DNS 레코드, redirect rule, 인증서, QR 이미지는 아직 만들지 않았습니다. `www` 호스트가 아니라 짧은 전용 `go` 서브도메인을 권장합니다.
+이 주소를 고정 진입점으로 선택했지만 아직 행사 설정은 `candidate`입니다. DNS 레코드, redirect rule, 인증서, QR 이미지는 만들지 않았습니다. 종단 간 검증이 끝날 때까지 `verified` 또는 `active`로 올리지 않습니다.
 
 ## 새 QR 승인 게이트
 

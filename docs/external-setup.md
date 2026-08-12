@@ -4,11 +4,12 @@
 
 ## 필요한 결정
 
-1. **최종 QR 도메인**: `go.gomdory.com/2026-sk` 사용 승인 여부. 대안은 `go.gkrry.com/2026-sk`입니다.
-2. **Supabase 프로젝트**: 사용할 조직, 프로젝트명, 한국 사용자에게 적절한 region, staging/production 분리 여부.
-3. **운영진 계정**: Supabase Auth에 초대할 이메일과 각 사용자의 `owner`/`operator`/`viewer` 역할.
-4. **카카오 경로**: 공식 알림톡 공급자 또는 기존 보안 relay, 발신 프로필, 승인 템플릿, 운영진 수신자와 참가자 완료 알림 허용 여부.
-5. **Cloudflare**: 두 도메인 중 관리 zone, `go` DNS/redirect, Turnstile widget을 만들 계정.
+1. **Supabase 프로젝트**: 연결된 `emotigom's Org`에 Nextbridge 전용 프로젝트를 만들지, 기존 `gom-clean-prod`를 재사용할지 선택. 전용 프로젝트 권장.
+2. **운영진 계정**: Supabase Auth에 초대할 이메일과 각 사용자의 `owner`/`operator`/`viewer` 역할.
+3. **카카오 경로**: 공식 알림톡 공급자 또는 기존 보안 relay, 발신 프로필, 승인 템플릿, 운영진 수신자와 참가자 완료 알림 허용 여부.
+4. **Cloudflare**: `gomdory.com` zone을 관리하는 계정과 `go` DNS/redirect, Turnstile widget 생성 권한.
+
+고정 주소는 `https://go.gomdory.com/2026-sk`로 선택했습니다. DNS·리디렉션·인증서·QR은 아직 만들지 않았으며 종단 간 검증 후 활성화합니다.
 
 카카오톡 우선 요구는 `kakao_alimtalk` 제공자 인터페이스로 반영했습니다. 브라우저나 공개 함수 코드에 카카오 자격증명을 넣지 않으며, 실제 공급자/relay가 확정되면 `_shared/notifications.ts`의 계약에 연결합니다. 공급자 승인 지연에 대비해 이메일 또는 Slack/Discord를 운영진 전용 보조 채널로 둘 수 있습니다.
 

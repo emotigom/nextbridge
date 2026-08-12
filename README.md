@@ -40,7 +40,7 @@ npm run verify
 행사별 정적 정보는 코드와 화면 컴포넌트에서 분리되어 있습니다.
 
 1. `src/content/events/<행사>.ts`에 일정·서명·협의실·FAQ 콘텐츠를 작성합니다.
-2. `src/config/events/<행사>.ts`에서 행사명·기간·장소·후보 QR 주소를 스키마로 검증합니다.
+2. `src/config/events/<행사>.ts`에서 행사명·기간·장소·접수번호 접두사·후보 QR 주소를 스키마로 검증합니다.
 3. `src/config/events/active.ts`에서 현재 행사를 선택합니다.
 4. 백엔드를 연결할 때 migration의 `events` 행과 같은 `slug`를 사용합니다.
 
@@ -50,7 +50,7 @@ npm run verify
 
 - `main`에 병합되면 Pages workflow가 검증 후 `dist`를 배포합니다.
 - GitHub Pages 빌드는 `/nextbridge`, 최종 짧은 도메인 빌드는 `/`를 기준으로 합니다.
-- 현재 후보 주소는 `https://go.gomdory.com/2026-sk`이며 확정·활성화·QR 생성은 하지 않았습니다.
+- 고정 주소는 `https://go.gomdory.com/2026-sk`로 선택했으며 DNS 연결·활성화·QR 생성은 아직 하지 않았습니다.
 - 기존 `nextbridge-classroom-kit`의 `program-03`와 이미 인쇄된 QR 경로는 새 사이트 배포·실기기 검증 전까지 유지합니다.
 
 자세한 순서는 [QR 전환 계획](docs/qr-cutover.md)을 따릅니다.

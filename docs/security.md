@@ -14,7 +14,7 @@
 
 운영진 역할은 사용자가 편집할 수 있는 metadata가 아니라 `event_operator_memberships` 테이블에 저장합니다. `admin-questions`는 전달된 Supabase Auth access token으로 사용자를 다시 확인하고 활성 멤버십의 `owner`, `operator`, `viewer` 역할을 검사합니다. `viewer`는 상태나 답변을 수정할 수 없습니다.
 
-질문 원문·연락처·비공개 토큰은 공개 Realtime publication에 넣지 않습니다. 상태 조회 응답은 접수번호, 유형, 상태, 답변, 타임스탬프만 반환하고 질문 원문과 연락처는 반환하지 않습니다.
+질문 원문·연락처·비공개 토큰은 공개 Realtime publication에 넣지 않습니다. 상태 조회 응답은 접수번호, 상태, 답변, 타임스탬프만 반환하고 질문 원문과 연락처는 반환하지 않습니다.
 
 ## 익명 질문 방어
 
@@ -26,11 +26,13 @@
 | 자동화    | Turnstile Siteverify 서버 호출 필수                                                     |
 | 토큰 검증 | `success`, `action=submit-question`, 예상 hostname, 단일 사용/만료를 공급자 검증에 위임 |
 | 속도 제한 | IP 파생 키+비밀 salt로 제출 10분당 6회, 조회 10분당 24회                                |
-| 원자성    | `check_question_rate_limit` 보안 정의 함수가 경합 없이 카운트 갱신                      |
+| 원자성    | `consume_question_rate_limit` 보안 호출자 함수가 service role 권한으로 카운트 갱신      |
 | 열거 방지 | 고엔트로피 접수번호와 비공개 토큰, 동일한 실패 메시지                                   |
 | 토큰 저장 | 비공개 토큰 원문 대신 SHA-256 해시 저장                                                 |
 
 비공개 확인 링크는 토큰을 query string이 아닌 URL fragment에 넣습니다. 정적 호스트, 프록시, Referer 로그에 토큰이 자동 전송되지 않으며 상태 화면이 fragment를 메모리로 읽은 뒤 주소 표시줄에서 제거합니다.
+
+속도 제한 함수는 `SECURITY INVOKER`로 실행하고 `PUBLIC`, `anon`, `authenticated`의 호출 권한을 철회합니다. 따라서 함수 자체가 RLS를 우회하지 않으며, 서버의 service role 호출에만 필요한 권한이 있습니다.
 
 ## 알림 최소화
 

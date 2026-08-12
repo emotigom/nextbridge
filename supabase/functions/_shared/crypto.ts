@@ -13,13 +13,15 @@ export function randomPrivateToken(): string {
   return btoa(binary).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "");
 }
 
-export function randomReceiptCode(): string {
+export function randomReceiptCode(prefix: string): string {
+  if (!/^[A-Z0-9]{2,8}$/.test(prefix)) throw new Error("INVALID_RECEIPT_PREFIX");
   const bytes = randomBytes(12);
   const characters = [...bytes].map(
     (byte) => RECEIPT_ALPHABET[byte % RECEIPT_ALPHABET.length] ?? "A"
   );
   return (
-    "SK26-" +
+    prefix +
+    "-" +
     characters.slice(0, 4).join("") +
     "-" +
     characters.slice(4, 8).join("") +

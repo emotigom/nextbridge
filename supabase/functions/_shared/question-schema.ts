@@ -62,7 +62,7 @@ export const statusLookupSchema = z
     privateToken: z.string().min(20).max(256).optional(),
     receiptCode: z
       .string()
-      .regex(/^SK26-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$/)
+      .regex(/^[A-Z0-9]{2,8}-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$/)
       .optional()
   })
   .refine((value) => Boolean(value.privateToken) !== Boolean(value.receiptCode), {
