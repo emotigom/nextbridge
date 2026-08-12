@@ -17,6 +17,7 @@ export const eventConfigSchema = z.object({
   slug: z.string().regex(/^[a-z0-9-]+$/),
   status: z.enum(["draft", "published", "archived"]),
   year: z.number().int().min(2026),
+  receiptPrefix: z.string().regex(/^[A-Z0-9]{2,8}$/),
   title: localizedTextSchema,
   shortTitle: localizedTextSchema,
   description: localizedTextSchema,

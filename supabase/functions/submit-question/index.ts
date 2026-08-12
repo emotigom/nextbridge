@@ -38,7 +38,7 @@ Deno.serve(async (request) => {
 
     const { data: event, error: eventError } = await admin
       .from("events")
-      .select("slug")
+      .select("slug, receipt_prefix")
       .eq("slug", parsed.data.eventSlug)
       .eq("is_active", true)
       .maybeSingle();
@@ -52,7 +52,7 @@ Deno.serve(async (request) => {
     let questionRecord: { id: string; receipt_code: string } | null = null;
 
     for (let attempt = 0; attempt < 3 && !questionRecord; attempt += 1) {
-      const receiptCode = randomReceiptCode();
+      const receiptCode = randomReceiptCode(event.receipt_prefix);
       const { data, error } = await admin
         .from("event_questions")
         .insert({

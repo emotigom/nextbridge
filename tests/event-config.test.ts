@@ -5,6 +5,7 @@ import { event2026Sk } from "../src/config/events/2026-sk";
 describe("2026-sk event configuration", () => {
   it("matches the reusable event schema", () => {
     expect(eventConfigSchema.safeParse(event2026Sk).success).toBe(true);
+    expect(event2026Sk.receiptPrefix).toBe("SK26");
   });
 
   it("contains all three days and the confirmed signature windows", () => {

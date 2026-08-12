@@ -8,6 +8,8 @@ create table public.events (
     check (slug ~ '^[a-z0-9-]{3,80}$'),
   title text not null
     check (char_length(title) between 1 and 200),
+  receipt_prefix text not null
+    check (receipt_prefix ~ '^[A-Z0-9]{2,8}$'),
   is_active boolean not null default false,
   starts_on date not null,
   ends_on date not null,
@@ -30,7 +32,7 @@ create table public.event_questions (
   id uuid primary key default extensions.gen_random_uuid(),
   event_slug text not null references public.events(slug) on delete restrict,
   receipt_code text not null unique
-    check (receipt_code ~ '^SK26-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$'),
+    check (receipt_code ~ '^[A-Z0-9]{2,8}-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$'),
   private_token_hash text not null unique
     check (private_token_hash ~ '^[0-9a-f]{64}$'),
   category text not null
@@ -121,6 +123,17 @@ create index question_notification_question_created_idx
 create index question_rate_limits_updated_idx
   on public.question_rate_limits (updated_at);
 
+create index event_operator_memberships_user_idx
+  on public.event_operator_memberships (user_id);
+
+create index event_questions_assigned_operator_idx
+  on public.event_questions (assigned_operator_id)
+  where assigned_operator_id is not null;
+
+create index question_status_events_actor_idx
+  on public.question_status_events (actor_user_id)
+  where actor_user_id is not null;
+
 alter table public.events enable row level security;
 alter table public.events force row level security;
 alter table public.event_operator_memberships enable row level security;
@@ -134,14 +147,14 @@ alter table public.question_notification_deliveries force row level security;
 alter table public.question_rate_limits enable row level security;
 alter table public.question_rate_limits force row level security;
 
-revoke all on table public.events from anon, authenticated;
-revoke all on table public.event_operator_memberships from anon, authenticated;
-revoke all on table public.event_questions from anon, authenticated;
-revoke all on table public.question_status_events from anon, authenticated;
-revoke all on table public.question_notification_deliveries from anon, authenticated;
-revoke all on table public.question_rate_limits from anon, authenticated;
-revoke all on sequence public.question_status_events_id_seq from anon, authenticated;
-revoke all on sequence public.question_notification_deliveries_id_seq from anon, authenticated;
+revoke all on table public.events from public, anon, authenticated;
+revoke all on table public.event_operator_memberships from public, anon, authenticated;
+revoke all on table public.event_questions from public, anon, authenticated;
+revoke all on table public.question_status_events from public, anon, authenticated;
+revoke all on table public.question_notification_deliveries from public, anon, authenticated;
+revoke all on table public.question_rate_limits from public, anon, authenticated;
+revoke all on sequence public.question_status_events_id_seq from public, anon, authenticated;
+revoke all on sequence public.question_notification_deliveries_id_seq from public, anon, authenticated;
 
 grant select, insert, update, delete on table public.events to service_role;
 grant select, insert, update, delete on table public.event_operator_memberships to service_role;
@@ -160,7 +173,7 @@ create or replace function public.consume_question_rate_limit(
 )
 returns boolean
 language plpgsql
-security definer
+security invoker
 set search_path = ''
 as $$
 declare
@@ -221,6 +234,7 @@ grant execute on function public.consume_question_rate_limit(text, text, integer
 insert into public.events (
   slug,
   title,
+  receipt_prefix,
   is_active,
   starts_on,
   ends_on
@@ -228,6 +242,7 @@ insert into public.events (
 values (
   '2026-sk',
   '경기 성취평가 표준화 평가도구 개발 합숙 워크숍',
+  'SK26',
   false,
   date '2026-08-28',
   date '2026-08-30'
@@ -235,6 +250,7 @@ values (
 on conflict (slug) do update
 set
   title = excluded.title,
+  receipt_prefix = excluded.receipt_prefix,
   starts_on = excluded.starts_on,
   ends_on = excluded.ends_on,
   updated_at = now();

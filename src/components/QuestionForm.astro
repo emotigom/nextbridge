@@ -104,10 +104,14 @@ const isConnected = Boolean(apiBase && turnstileSiteKey);
       {
         turnstileSiteKey ? (
           <div
+            id="question-turnstile"
             class="cf-turnstile"
             data-sitekey={turnstileSiteKey}
             data-theme="light"
+            data-language="ko"
             data-action="submit-question"
+            data-refresh-expired="auto"
+            data-retry="auto"
           />
         ) : (
           <span class="captcha-placeholder">연결 전</span>
@@ -156,6 +160,13 @@ const isConnected = Boolean(apiBase && turnstileSiteKey);
   const receiptCard = panel?.querySelector<HTMLElement>("[data-receipt-card]");
   const receiptCode = panel?.querySelector<HTMLElement>("[data-receipt-code]");
   const privateLink = panel?.querySelector<HTMLAnchorElement>("[data-private-status-link]");
+
+  function resetTurnstile() {
+    const turnstileWindow = window as Window & {
+      turnstile?: { reset: (container?: string | HTMLElement) => void };
+    };
+    turnstileWindow.turnstile?.reset("#question-turnstile");
+  }
 
   function updateContactField() {
     if (!contactMethod || !contactValueField || !contactValue) return;
@@ -277,6 +288,7 @@ const isConnected = Boolean(apiBase && turnstileSiteKey);
       form.hidden = true;
       receiptCard?.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (error) {
+      if (panel?.dataset.turnstileConfigured === "true") resetTurnstile();
       if (status) {
         status.textContent =
           error instanceof Error

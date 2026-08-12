@@ -5,6 +5,7 @@ export const event2026Sk = eventConfigSchema.parse({
   slug: "2026-sk",
   status: "draft",
   year: 2026,
+  receiptPrefix: "SK26",
   title: { ko: "경기 성취평가 표준화 평가도구 개발 합숙 워크숍" },
   shortTitle: { ko: "2026 합숙 워크숍" },
   description: {
