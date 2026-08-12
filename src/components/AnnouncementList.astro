@@ -1,0 +1,27 @@
+---
+import { activeEvent } from "@/config/events/active";
+---
+
+<section class="content-section section-shell" aria-labelledby="announcement-title">
+  <header class="section-heading compact-heading">
+    <div>
+      <p class="eyebrow">NOTICE</p>
+      <h2 id="announcement-title">공지사항</h2>
+    </div>
+    <p>현장 변경 내용을 가장 먼저 확인하는 곳입니다.</p>
+  </header>
+  <div class="announcement-list">
+    {
+      activeEvent.announcements.map((notice) => (
+        <article class:list={["announcement-card", notice.important && "is-important"]}>
+          <p>
+            {notice.important && <strong>중요</strong>}
+            <time datetime={notice.publishedAt}>{notice.publishedAt.replaceAll("-", ".")}</time>
+          </p>
+          <h3>{notice.title.ko}</h3>
+          <p>{notice.body.ko}</p>
+        </article>
+      ))
+    }
+  </div>
+</section>

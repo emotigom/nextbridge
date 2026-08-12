@@ -1,0 +1,18 @@
+---
+import PageIntro from "@/components/PageIntro.astro";
+import ScheduleList from "@/components/ScheduleList.astro";
+import SignatureGuide from "@/components/SignatureGuide.astro";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="3일 전체 일정" currentPath="/schedule/">
+  <div class="page-content section-shell">
+    <PageIntro
+      eyebrow="THREE-DAY PROGRAM"
+      title="3일 전체 일정"
+      description="식사·협의·개별 작업과 최종 제출까지 시간과 장소를 날짜별로 확인하세요."
+    />
+    <ScheduleList />
+  </div>
+  <SignatureGuide />
+</BaseLayout>

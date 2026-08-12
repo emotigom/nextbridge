@@ -1,0 +1,45 @@
+---
+import { withBase } from "@/lib/paths";
+
+const actions = [
+  {
+    href: "/schedule/",
+    number: "01",
+    title: "3일 전체 일정",
+    detail: "시간·장소를 한 번에 확인"
+  },
+  {
+    href: "/rooms/",
+    number: "02",
+    title: "내 교과 협의실",
+    detail: "교과명으로 빠르게 검색"
+  },
+  {
+    href: "/visit/",
+    number: "03",
+    title: "오시는 길·준비물",
+    detail: "주소와 방문 전 체크"
+  },
+  {
+    href: "/questions/",
+    number: "04",
+    title: "질문·답변 확인",
+    detail: "접수번호로 처리 상태 확인"
+  }
+];
+---
+
+<nav class="quick-actions section-shell" aria-label="현장 빠른 메뉴">
+  {
+    actions.map((action) => (
+      <a href={withBase(action.href)}>
+        <span class="quick-number">{action.number}</span>
+        <span>
+          <strong>{action.title}</strong>
+          <small>{action.detail}</small>
+        </span>
+        <i aria-hidden="true">→</i>
+      </a>
+    ))
+  }
+</nav>

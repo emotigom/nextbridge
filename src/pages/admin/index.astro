@@ -1,0 +1,16 @@
+---
+import AdminConsole from "@/components/AdminConsole.astro";
+import PageIntro from "@/components/PageIntro.astro";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="운영진 질문 관리" noIndex>
+  <div class="page-content section-shell">
+    <PageIntro
+      eyebrow="OPERATOR ONLY"
+      title="운영진 질문 관리"
+      description="인증된 운영진만 질문 원문과 선택적 연락처를 확인하고 처리 상태와 답변을 변경할 수 있습니다."
+    />
+    <AdminConsole />
+  </div>
+</BaseLayout>

@@ -1,0 +1,44 @@
+---
+import { activeEvent } from "@/config/events/active";
+---
+
+<section class="content-section section-shell" aria-labelledby="signature-title">
+  <header class="section-heading">
+    <div>
+      <p class="eyebrow">MOST IMPORTANT</p>
+      <h2 id="signature-title">등록부 서명 안내</h2>
+    </div>
+    <p>29일과 30일은 오전·오후에 각각 한 번씩, 하루 두 번 서명해 주세요.</p>
+  </header>
+  <div class="signature-grid">
+    {
+      activeEvent.signatureDays.map((day) => (
+        <article class:list={["signature-card", day.requiredCount === 2 && "signature-featured"]}>
+          <header>
+            <strong>{day.label.ko.split(".(")[0]}</strong>
+            <span>
+              {day.label.ko.includes("금")
+                ? "금요일"
+                : day.label.ko.includes("토")
+                  ? "토요일"
+                  : "일요일"}
+            </span>
+          </header>
+          <div>
+            {day.windows.map((window) => (
+              <p>
+                <span>{window.label.ko}</span>
+                <strong>{window.time}</strong>
+              </p>
+            ))}
+          </div>
+          <b>{day.requiredCount}회 서명</b>
+        </article>
+      ))
+    }
+  </div>
+  <p class="inline-notice">
+    <span aria-hidden="true">✓</span>
+    참석 확인 후 반드시 본인이 직접 서명해 주세요.
+  </p>
+</section>

@@ -1,0 +1,14 @@
+---
+import { activeEvent } from "@/config/events/active";
+---
+
+<div class="faq-list">
+  {
+    activeEvent.faqs.map((faq) => (
+      <details>
+        <summary>{faq.question.ko}</summary>
+        <p>{faq.answer.ko}</p>
+      </details>
+    ))
+  }
+</div>

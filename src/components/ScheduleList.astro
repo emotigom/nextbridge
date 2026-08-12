@@ -1,0 +1,36 @@
+---
+import { activeEvent } from "@/config/events/active";
+
+interface Props {
+  compact?: boolean;
+}
+
+const { compact = false } = Astro.props;
+const days = compact ? activeEvent.schedule.slice(0, 1) : activeEvent.schedule;
+---
+
+<div class="schedule-stack">
+  {
+    days.map((day, index) => (
+      <details class="schedule-day" open={index === 0}>
+        <summary>
+          <span class="day-pill">DAY {day.dayNumber}</span>
+          <strong>{day.label.ko}</strong>
+          <span class="summary-hint">일정 펼치기</span>
+        </summary>
+        <div class="timeline">
+          {day.items.map((item) => (
+            <article class:list={["timeline-row", "tone-" + item.tone]}>
+              <time>{item.time}</time>
+              <div>
+                <h3>{item.title.ko}</h3>
+                {item.detail && <p>{item.detail.ko}</p>}
+                {item.location && <span>{item.location.ko}</span>}
+              </div>
+            </article>
+          ))}
+        </div>
+      </details>
+    ))
+  }
+</div>

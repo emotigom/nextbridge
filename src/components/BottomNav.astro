@@ -1,0 +1,26 @@
+---
+import { withBase } from "@/lib/paths";
+
+interface Props {
+  currentPath: string;
+}
+
+const { currentPath } = Astro.props;
+const links = [
+  { href: "/", label: "홈", icon: "⌂" },
+  { href: "/schedule/", label: "일정", icon: "□" },
+  { href: "/rooms/", label: "협의실", icon: "⌕" },
+  { href: "/questions/", label: "질문", icon: "?" }
+];
+---
+
+<nav class="bottom-nav" aria-label="모바일 빠른 메뉴">
+  {
+    links.map((link) => (
+      <a href={withBase(link.href)} aria-current={currentPath === link.href ? "page" : undefined}>
+        <span aria-hidden="true">{link.icon}</span>
+        <strong>{link.label}</strong>
+      </a>
+    ))
+  }
+</nav>

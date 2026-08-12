@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+# The final custom-domain sitemap is added after the QR cutover.

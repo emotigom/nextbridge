@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.astro/
+.cache/
+coverage/
+playwright-report/
+test-results/
+.env
+.env.*
+!.env.example
+!supabase/functions/.env.example
+.DS_Store
+*.log
