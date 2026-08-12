@@ -1,0 +1,41 @@
+---
+import { activeEvent } from "@/config/events/active";
+import { withBase } from "@/lib/paths";
+
+interface Props {
+  currentPath: string;
+}
+
+const { currentPath } = Astro.props;
+const links = [
+  { href: "/", label: "홈" },
+  { href: "/schedule/", label: "전체 일정" },
+  { href: "/rooms/", label: "협의실" },
+  { href: "/visit/", label: "오시는 길" },
+  { href: "/questions/", label: "질문하기" }
+];
+---
+
+<header class="site-header">
+  <div class="site-header-inner">
+    <a class="brand-lockup" href={withBase("/")} aria-label="행사 현장지원 홈">
+      <img src={withBase("/logo-symbol.png")} width="48" height="48" alt="" />
+      <span>
+        <strong>{activeEvent.organizer.ko}</strong>
+        <small>NEXTBRIDGE · 현장지원</small>
+      </span>
+    </a>
+    <nav class="desktop-nav" aria-label="주요 메뉴">
+      {
+        links.map((link) => (
+          <a
+            href={withBase(link.href)}
+            aria-current={currentPath === link.href ? "page" : undefined}
+          >
+            {link.label}
+          </a>
+        ))
+      }
+    </nav>
+  </div>
+</header>

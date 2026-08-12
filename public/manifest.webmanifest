@@ -1,0 +1,39 @@
+{
+  "name": "Nextbridge 행사 현장지원",
+  "short_name": "현장지원",
+  "description": "교사를 위한 행사 일정, 서명, 협의실과 질문 안내",
+  "lang": "ko",
+  "dir": "ltr",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "start_url": "./",
+  "scope": "./",
+  "background_color": "#F7F7F5",
+  "theme_color": "#0A1E38",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "logo-gyeonggi.png",
+      "sizes": "909x909",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "전체 일정",
+      "short_name": "일정",
+      "url": "schedule/"
+    },
+    {
+      "name": "협의실 찾기",
+      "short_name": "협의실",
+      "url": "rooms/"
+    },
+    {
+      "name": "질문하기",
+      "short_name": "질문",
+      "url": "questions/"
+    }
+  ]
+}

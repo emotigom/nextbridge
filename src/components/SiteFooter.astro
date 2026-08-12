@@ -1,0 +1,20 @@
+---
+import { activeEvent } from "@/config/events/active";
+import { withBase } from "@/lib/paths";
+---
+
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <div class="footer-brand">
+      <img src={withBase("/logo-symbol.png")} width="42" height="42" alt="" />
+      <p>
+        <strong>{activeEvent.organizer.ko}</strong>
+        <span>운영 지원 · Nextbridge</span>
+      </p>
+    </div>
+    <p class="footer-note">
+      공개가 승인된 행사 정보만 제공합니다. 학생·학교·강사의 개인정보를 질문에 입력하지 마세요.
+    </p>
+    <a href={withBase("/admin/")} class="operator-link">운영진 화면</a>
+  </div>
+</footer>

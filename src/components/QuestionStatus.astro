@@ -1,0 +1,182 @@
+---
+import { activeEvent } from "@/config/events/active";
+
+const apiBase = import.meta.env.PUBLIC_QUESTION_API_BASE_URL ?? "";
+---
+
+<section
+  class="status-panel"
+  data-status-panel
+  data-api-base={apiBase}
+  data-event-slug={activeEvent.slug}
+>
+  {
+    !apiBase && (
+      <div class="setup-banner" role="note">
+        <strong>답변 조회 연결 준비 중</strong>
+        <p>실제 질문 API가 연결된 뒤 접수번호 또는 비공개 링크로 답변을 확인할 수 있습니다.</p>
+      </div>
+    )
+  }
+  <form class="status-form" data-status-form>
+    <label for="question-lookup">접수번호 또는 비공개 확인 링크</label>
+    <div>
+      <input
+        id="question-lookup"
+        name="lookup"
+        type="text"
+        autocomplete="off"
+        placeholder="SK26-XXXX-XXXX-XXXX"
+        required
+      />
+      <button class="button button-primary" type="submit">답변 확인</button>
+    </div>
+    <p class="field-help" data-private-link-detected hidden>
+      주소의 비공개 확인 토큰을 안전하게 불러왔습니다.
+    </p>
+    <p class="form-status" role="status" aria-live="polite" data-status-message></p>
+  </form>
+
+  <article class="answer-card" data-answer-card hidden>
+    <header>
+      <div>
+        <p class="eyebrow">QUESTION STATUS</p>
+        <h2 data-answer-state>접수</h2>
+      </div>
+      <span data-answer-receipt></span>
+    </header>
+    <ol class="status-steps" aria-label="질문 처리 상태">
+      <li data-step="received">접수</li>
+      <li data-step="reviewing">확인 중</li>
+      <li data-step="answered">답변 완료</li>
+    </ol>
+    <div class="answer-content">
+      <strong>운영진 답변</strong>
+      <p data-answer-text>운영진이 질문을 확인하고 있습니다.</p>
+    </div>
+    <p class="answer-updated" data-answer-updated></p>
+  </article>
+</section>
+
+<script>
+  const panel = document.querySelector<HTMLElement>("[data-status-panel]");
+  const form = panel?.querySelector<HTMLFormElement>("[data-status-form]");
+  const input = form?.elements.namedItem("lookup") as HTMLInputElement | null;
+  const message = panel?.querySelector<HTMLElement>("[data-status-message]");
+  const detected = panel?.querySelector<HTMLElement>("[data-private-link-detected]");
+  const card = panel?.querySelector<HTMLElement>("[data-answer-card]");
+  let privateToken = "";
+
+  const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+  const tokenFromHash = hash.get("token");
+  if (tokenFromHash) {
+    privateToken = tokenFromHash;
+    if (input) input.placeholder = "비공개 확인 링크를 불러왔습니다.";
+    if (detected) detected.hidden = false;
+    history.replaceState(null, "", window.location.pathname + window.location.search);
+  }
+
+  function renderStatus(result: {
+    receiptCode: string;
+    status: "received" | "reviewing" | "answered";
+    answer: string | null;
+    updatedAt: string;
+  }) {
+    if (!card) return;
+    const labels = {
+      received: "접수",
+      reviewing: "확인 중",
+      answered: "답변 완료"
+    };
+    const order = ["received", "reviewing", "answered"];
+    const current = order.indexOf(result.status);
+    const state = card.querySelector<HTMLElement>("[data-answer-state]");
+    const receipt = card.querySelector<HTMLElement>("[data-answer-receipt]");
+    const answer = card.querySelector<HTMLElement>("[data-answer-text]");
+    const updated = card.querySelector<HTMLElement>("[data-answer-updated]");
+    if (state) state.textContent = labels[result.status];
+    if (receipt) receipt.textContent = result.receiptCode;
+    if (answer) {
+      answer.textContent =
+        result.answer ?? "운영진이 질문을 확인하고 있습니다. 조금만 기다려 주세요.";
+    }
+    if (updated) {
+      updated.textContent =
+        "마지막 변경 " +
+        new Intl.DateTimeFormat("ko-KR", {
+          dateStyle: "medium",
+          timeStyle: "short"
+        }).format(new Date(result.updatedAt));
+    }
+    card.querySelectorAll<HTMLElement>("[data-step]").forEach((step, index) => {
+      step.classList.toggle("is-complete", index <= current);
+      if (index === current) step.setAttribute("aria-current", "step");
+      else step.removeAttribute("aria-current");
+    });
+    card.hidden = false;
+  }
+
+  form?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (message) message.textContent = "";
+    const apiBase = panel?.dataset.apiBase ?? "";
+    if (!apiBase) {
+      if (message) message.textContent = "현재는 답변 조회 시스템 연결 전입니다.";
+      return;
+    }
+
+    const typed = input?.value.trim() ?? "";
+    let token = privateToken;
+    let receiptCode = "";
+    if (typed.includes("#token=")) {
+      token = new URLSearchParams(typed.split("#")[1]).get("token") ?? "";
+    } else if (typed.startsWith("SK26-")) {
+      receiptCode = typed.toUpperCase();
+    } else if (typed.length > 20) {
+      token = typed;
+    }
+    if (!token && !receiptCode) {
+      if (message) message.textContent = "접수번호 또는 비공개 확인 링크를 확인해 주세요.";
+      return;
+    }
+
+    try {
+      const response = await fetch(apiBase.replace(/\/$/, "") + "/question-status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventSlug: panel?.dataset.eventSlug ?? "",
+          privateToken: token || undefined,
+          receiptCode: receiptCode || undefined
+        })
+      });
+      const result: unknown = await response.json();
+      if (
+        !response.ok ||
+        typeof result !== "object" ||
+        result === null ||
+        !("receiptCode" in result) ||
+        !("status" in result) ||
+        !("updatedAt" in result) ||
+        typeof result.receiptCode !== "string" ||
+        typeof result.status !== "string" ||
+        !["received", "reviewing", "answered"].includes(result.status) ||
+        typeof result.updatedAt !== "string"
+      ) {
+        throw new Error("일치하는 질문을 찾지 못했습니다.");
+      }
+      renderStatus({
+        receiptCode: result.receiptCode,
+        status: result.status as "received" | "reviewing" | "answered",
+        answer: "answer" in result && typeof result.answer === "string" ? result.answer : null,
+        updatedAt: result.updatedAt
+      });
+    } catch (error) {
+      if (card) card.hidden = true;
+      if (message) {
+        message.textContent =
+          error instanceof Error ? error.message : "답변을 불러오지 못했습니다.";
+      }
+    }
+  });
+</script>

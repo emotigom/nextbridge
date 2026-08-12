@@ -1,0 +1,69 @@
+---
+import BottomNav from "@/components/BottomNav.astro";
+import SiteFooter from "@/components/SiteFooter.astro";
+import SiteHeader from "@/components/SiteHeader.astro";
+import { activeEvent } from "@/config/events/active";
+import { withBase } from "@/lib/paths";
+import "@/styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+  currentPath?: string;
+  noIndex?: boolean;
+}
+
+const {
+  title,
+  description = activeEvent.description.ko,
+  currentPath = "/",
+  noIndex = false
+} = Astro.props;
+const pageTitle = title
+  ? title + " | Nextbridge 현장지원"
+  : activeEvent.shortTitle.ko + " | 현장지원";
+const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin);
+const logoPath = withBase("/logo-gyeonggi.png");
+const manifestPath = withBase("/manifest.webmanifest");
+const serviceWorkerPath = withBase("/sw.js");
+---
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0A1E38" />
+    <meta name="color-scheme" content="light" />
+    <meta name="description" content={description} />
+    {noIndex && <meta name="robots" content="noindex, nofollow" />}
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/png" href={logoPath} />
+    <link rel="apple-touch-icon" href={logoPath} />
+    <link rel="manifest" href={manifestPath} />
+    <title>{pageTitle}</title>
+  </head>
+  <body>
+    <div class="page-rail" aria-hidden="true"></div>
+    <a class="skip-link" href="#main-content">본문으로 바로가기</a>
+    <div class="ambient" aria-hidden="true">
+      <span class="ambient-orb ambient-orb-one"></span>
+      <span class="ambient-orb ambient-orb-two"></span>
+    </div>
+    <SiteHeader currentPath={currentPath} />
+    <main id="main-content">
+      <slot />
+    </main>
+    <SiteFooter />
+    <BottomNav currentPath={currentPath} />
+    <script is:inline define:vars={{ serviceWorkerPath }}>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register(serviceWorkerPath).catch(() => {
+            // Core information remains available without the service worker.
+          });
+        });
+      }
+    </script>
+  </body>
+</html>

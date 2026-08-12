@@ -1,0 +1,340 @@
+---
+import { activeEvent } from "@/config/events/active";
+
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL ?? "";
+const publishableKey = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "";
+const apiBase = import.meta.env.PUBLIC_QUESTION_API_BASE_URL ?? "";
+const isConnected = Boolean(supabaseUrl && publishableKey && apiBase);
+---
+
+<section
+  class="admin-console"
+  data-admin-console
+  data-supabase-url={supabaseUrl}
+  data-publishable-key={publishableKey}
+  data-api-base={apiBase}
+  data-event-slug={activeEvent.slug}
+>
+  <div class="workflow-summary" aria-label="질문 처리 흐름">
+    <article><span>01</span><strong>접수</strong><p>새 질문과 알림을 확인합니다.</p></article>
+    <article><span>02</span><strong>확인 중</strong><p>담당자가 내용을 검토합니다.</p></article>
+    <article><span>03</span><strong>답변 완료</strong><p>답변과 완료 알림을 보냅니다.</p></article>
+  </div>
+
+  {
+    !isConnected && (
+      <div class="setup-banner" role="note">
+        <strong>운영 시스템 연결 전</strong>
+        <p>
+          정보 구조와 인증 경계만 준비된 상태입니다. 실제 질문 원문과 연락처는 Supabase 연결 후
+          권한이 등록된 운영진에게만 표시됩니다.
+        </p>
+      </div>
+    )
+  }
+
+  <form class="operator-login" data-operator-login hidden={!isConnected}>
+    <div>
+      <p class="eyebrow">OPERATOR SIGN IN</p>
+      <h2>운영진 로그인</h2>
+      <p>Supabase Auth 계정과 운영진 권한이 모두 확인되어야 접근할 수 있습니다.</p>
+    </div>
+    <label>
+      <span>이메일</span>
+      <input type="email" name="email" autocomplete="username" required />
+    </label>
+    <label>
+      <span>비밀번호</span>
+      <input type="password" name="password" autocomplete="current-password" required />
+    </label>
+    <button class="button button-primary" type="submit">로그인</button>
+    <p class="form-status" role="status" aria-live="polite" data-admin-message></p>
+  </form>
+
+  <section class="operator-workspace" data-operator-workspace hidden>
+    <header>
+      <div>
+        <p class="eyebrow">QUESTION DESK</p>
+        <h2>질문 처리함</h2>
+      </div>
+      <div class="button-row">
+        <button class="button button-secondary" type="button" data-refresh-questions>
+          새로고침
+        </button>
+        <button class="button button-secondary" type="button" data-operator-logout>
+          로그아웃
+        </button>
+      </div>
+    </header>
+    <p class="form-status" role="status" aria-live="polite" data-workspace-message></p>
+    <div class="admin-question-list" data-admin-question-list></div>
+  </section>
+</section>
+
+<script>
+  import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+
+  interface AdminQuestion {
+    id: string;
+    receiptCode: string;
+    category: string;
+    question: string;
+    contactMethod: string;
+    contactValue: string | null;
+    status: "received" | "reviewing" | "answered";
+    answer: string | null;
+    createdAt: string;
+    updatedAt: string;
+  }
+
+  const consoleRoot = document.querySelector<HTMLElement>("[data-admin-console]");
+  const login = consoleRoot?.querySelector<HTMLFormElement>("[data-operator-login]");
+  const workspace = consoleRoot?.querySelector<HTMLElement>("[data-operator-workspace]");
+  const loginMessage = consoleRoot?.querySelector<HTMLElement>("[data-admin-message]");
+  const workspaceMessage = consoleRoot?.querySelector<HTMLElement>("[data-workspace-message]");
+  const list = consoleRoot?.querySelector<HTMLElement>("[data-admin-question-list]");
+  const refresh = consoleRoot?.querySelector<HTMLButtonElement>("[data-refresh-questions]");
+  const logout = consoleRoot?.querySelector<HTMLButtonElement>("[data-operator-logout]");
+  let client: SupabaseClient | null = null;
+  let accessToken = "";
+
+  function isQuestion(value: unknown): value is AdminQuestion {
+    if (typeof value !== "object" || value === null) return false;
+    const question = value as Partial<AdminQuestion>;
+    return (
+      typeof question.id === "string" &&
+      typeof question.receiptCode === "string" &&
+      typeof question.category === "string" &&
+      typeof question.question === "string" &&
+      typeof question.status === "string" &&
+      ["received", "reviewing", "answered"].includes(question.status)
+    );
+  }
+
+  function addText(parent: HTMLElement, tag: string, text: string, className?: string) {
+    const element = document.createElement(tag);
+    element.textContent = text;
+    if (className) element.className = className;
+    parent.append(element);
+    return element;
+  }
+
+  function renderQuestions(questions: AdminQuestion[]) {
+    if (!list) return;
+    list.replaceChildren();
+    if (questions.length === 0) {
+      addText(list, "p", "접수된 질문이 없습니다.", "empty-state");
+      return;
+    }
+
+    for (const question of questions) {
+      const article = document.createElement("article");
+      article.className = "admin-question-card";
+      article.dataset.questionId = question.id;
+
+      const header = document.createElement("header");
+      const meta = document.createElement("div");
+      addText(meta, "strong", question.receiptCode);
+      addText(
+        meta,
+        "span",
+        new Intl.DateTimeFormat("ko-KR", {
+          dateStyle: "medium",
+          timeStyle: "short"
+        }).format(new Date(question.createdAt))
+      );
+      header.append(meta);
+      addText(header, "span", question.category, "category-badge");
+      article.append(header);
+
+      addText(article, "p", question.question, "admin-question-text");
+      const contact = document.createElement("dl");
+      const contactRow = document.createElement("div");
+      addText(contactRow, "dt", "연락");
+      addText(
+        contactRow,
+        "dd",
+        question.contactValue
+          ? question.contactMethod + " · " + question.contactValue
+          : "연락처 없음"
+      );
+      contact.append(contactRow);
+      article.append(contact);
+
+      const form = document.createElement("form");
+      form.className = "admin-answer-form";
+      form.dataset.answerForm = "";
+      const selectLabel = document.createElement("label");
+      addText(selectLabel, "span", "처리 상태");
+      const select = document.createElement("select");
+      select.name = "status";
+      const statusOptions: Array<[string, string]> = [
+        ["received", "접수"],
+        ["reviewing", "확인 중"],
+        ["answered", "답변 완료"]
+      ];
+      for (const [value, label] of statusOptions) {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = label;
+        option.selected = question.status === value;
+        select.append(option);
+      }
+      selectLabel.append(select);
+
+      const answerLabel = document.createElement("label");
+      addText(answerLabel, "span", "참가자에게 표시할 답변");
+      const textarea = document.createElement("textarea");
+      textarea.name = "answer";
+      textarea.rows = 4;
+      textarea.maxLength = 2000;
+      textarea.value = question.answer ?? "";
+      answerLabel.append(textarea);
+
+      const button = document.createElement("button");
+      button.type = "submit";
+      button.className = "button button-primary";
+      button.textContent = "상태·답변 저장";
+      form.append(selectLabel, answerLabel, button);
+      article.append(form);
+      list.append(article);
+    }
+  }
+
+  async function api(path: string, init?: RequestInit): Promise<unknown> {
+    const apiBase = consoleRoot?.dataset.apiBase ?? "";
+    const response = await fetch(apiBase.replace(/\/$/, "") + path, {
+      ...init,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + accessToken,
+        ...(init?.headers ?? {})
+      }
+    });
+    const result: unknown = await response.json();
+    if (!response.ok) {
+      const message =
+        typeof result === "object" &&
+        result !== null &&
+        "message" in result &&
+        typeof result.message === "string"
+          ? result.message
+          : "요청을 처리하지 못했습니다.";
+      throw new Error(message);
+    }
+    return result;
+  }
+
+  async function loadQuestions() {
+    if (workspaceMessage) workspaceMessage.textContent = "질문을 불러오는 중…";
+    try {
+      const result = await api(
+        "/admin-questions?eventSlug=" + encodeURIComponent(consoleRoot?.dataset.eventSlug ?? "")
+      );
+      const questions =
+        typeof result === "object" &&
+        result !== null &&
+        "questions" in result &&
+        Array.isArray(result.questions)
+          ? result.questions.filter(isQuestion)
+          : [];
+      renderQuestions(questions);
+      if (workspaceMessage) workspaceMessage.textContent = questions.length + "건을 확인했습니다.";
+    } catch (error) {
+      if (workspaceMessage) {
+        workspaceMessage.textContent =
+          error instanceof Error ? error.message : "질문을 불러오지 못했습니다.";
+      }
+    }
+  }
+
+  if (consoleRoot?.dataset.supabaseUrl && consoleRoot.dataset.publishableKey) {
+    client = createClient(consoleRoot.dataset.supabaseUrl, consoleRoot.dataset.publishableKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false
+      }
+    });
+  }
+
+  login?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!client) return;
+    const data = new FormData(login);
+    if (loginMessage) loginMessage.textContent = "권한을 확인하는 중…";
+    const { data: authData, error } = await client.auth.signInWithPassword({
+      email: String(data.get("email") ?? ""),
+      password: String(data.get("password") ?? "")
+    });
+    if (error || !authData.session) {
+      if (loginMessage) loginMessage.textContent = "로그인 정보를 확인해 주세요.";
+      return;
+    }
+    accessToken = authData.session.access_token;
+    try {
+      await api("/admin-questions/authorize", {
+        method: "POST",
+        body: JSON.stringify({ eventSlug: consoleRoot?.dataset.eventSlug ?? "" })
+      });
+      login.hidden = true;
+      if (workspace) workspace.hidden = false;
+      await loadQuestions();
+    } catch (authorizationError) {
+      accessToken = "";
+      await client.auth.signOut();
+      if (loginMessage) {
+        loginMessage.textContent =
+          authorizationError instanceof Error
+            ? authorizationError.message
+            : "이 행사에 대한 운영진 권한이 없습니다.";
+      }
+    }
+  });
+
+  refresh?.addEventListener("click", loadQuestions);
+  logout?.addEventListener("click", async () => {
+    accessToken = "";
+    await client?.auth.signOut();
+    if (workspace) workspace.hidden = true;
+    if (login) login.hidden = false;
+    list?.replaceChildren();
+    if (loginMessage) loginMessage.textContent = "안전하게 로그아웃했습니다.";
+  });
+
+  list?.addEventListener("submit", async (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLFormElement) || !target.matches("[data-answer-form]")) return;
+    event.preventDefault();
+    const card = target.closest<HTMLElement>("[data-question-id]");
+    if (!card) return;
+    const data = new FormData(target);
+    const button = target.querySelector<HTMLButtonElement>("button[type='submit']");
+    if (button) {
+      button.disabled = true;
+      button.textContent = "저장 중…";
+    }
+    try {
+      await api("/admin-questions/" + encodeURIComponent(card.dataset.questionId ?? ""), {
+        method: "PATCH",
+        body: JSON.stringify({
+          eventSlug: consoleRoot?.dataset.eventSlug ?? "",
+          status: String(data.get("status") ?? ""),
+          answer: String(data.get("answer") ?? "")
+        })
+      });
+      if (workspaceMessage) workspaceMessage.textContent = "상태와 답변을 저장했습니다.";
+      await loadQuestions();
+    } catch (error) {
+      if (workspaceMessage) {
+        workspaceMessage.textContent =
+          error instanceof Error ? error.message : "답변을 저장하지 못했습니다.";
+      }
+    } finally {
+      if (button) {
+        button.disabled = false;
+        button.textContent = "상태·답변 저장";
+      }
+    }
+  });
+</script>

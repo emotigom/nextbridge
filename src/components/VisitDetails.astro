@@ -1,0 +1,66 @@
+---
+import { activeEvent } from "@/config/events/active";
+---
+
+<div class="visit-grid">
+  <article class="visit-card location-panel">
+    <p class="eyebrow">LOCATION</p>
+    <h2>{activeEvent.venue.name.ko}</h2>
+    <address>
+      <strong>{activeEvent.venue.address.ko}</strong>
+      <a href={"tel:" + activeEvent.venue.phone}>{activeEvent.venue.phone}</a>
+    </address>
+    <dl>
+      <div><dt>등록</dt><dd>{activeEvent.venue.registrationLocation.ko}</dd></div>
+      <div><dt>이동</dt><dd>{activeEvent.venue.transportNote.ko}</dd></div>
+    </dl>
+    <div class="button-row">
+      <a
+        class="button button-primary"
+        href={activeEvent.venue.website}
+        target="_blank"
+        rel="noreferrer"
+      >
+        센터 홈페이지
+      </a>
+      <button
+        class="button button-secondary"
+        type="button"
+        data-copy-address={activeEvent.venue.address.ko}
+      >
+        주소 복사
+      </button>
+    </div>
+    <p class="copy-status" role="status" aria-live="polite" data-copy-status></p>
+  </article>
+  <article class="visit-card checklist-panel">
+    <p class="eyebrow">BEFORE YOU GO</p>
+    <h2>방문 전 준비물</h2>
+    <ul class="check-list">
+      {
+        activeEvent.preparation.map((item) => (
+          <li>
+            <>
+              <span aria-hidden="true">✓</span>
+              <p>{item.ko}</p>
+            </>
+          </li>
+        ))
+      }
+    </ul>
+  </article>
+</div>
+
+<script>
+  const copyButton = document.querySelector<HTMLButtonElement>("[data-copy-address]");
+  const copyStatus = document.querySelector<HTMLElement>("[data-copy-status]");
+  copyButton?.addEventListener("click", async () => {
+    const address = copyButton.dataset.copyAddress ?? "";
+    try {
+      await navigator.clipboard.writeText(address);
+      if (copyStatus) copyStatus.textContent = "주소를 복사했습니다.";
+    } catch {
+      if (copyStatus) copyStatus.textContent = "주소를 길게 눌러 직접 복사해 주세요.";
+    }
+  });
+</script>

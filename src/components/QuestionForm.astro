@@ -1,0 +1,293 @@
+---
+import { activeEvent } from "@/config/events/active";
+import { withBase } from "@/lib/paths";
+
+const apiBase = import.meta.env.PUBLIC_QUESTION_API_BASE_URL ?? "";
+const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "";
+const statusPath = withBase("/questions/status/");
+const isConnected = Boolean(apiBase && turnstileSiteKey);
+---
+
+<section
+  class="question-panel"
+  data-question-panel
+  data-api-base={apiBase}
+  data-status-path={statusPath}
+  data-event-slug={activeEvent.slug}
+  data-turnstile-configured={turnstileSiteKey ? "true" : "false"}
+>
+  {
+    !isConnected && (
+      <div class="setup-banner" role="note">
+        <strong>질문 접수 연결 준비 중</strong>
+        <p>
+          화면과 검증 구조는 준비됐지만 아직 Supabase·Turnstile이 연결되지 않았습니다. 입력한 내용은
+          전송되거나 저장되지 않습니다.
+        </p>
+      </div>
+    )
+  }
+  <form class="question-form" data-question-form novalidate>
+    <div class="field">
+      <label for="question-category">1. 질문 유형</label>
+      <select id="question-category" name="category" required>
+        <option value="">유형을 선택해 주세요.</option>
+        {
+          activeEvent.questionCategories.map((category) => (
+            <option value={category.value}>{category.label.ko}</option>
+          ))
+        }
+      </select>
+      <p class="field-error" data-error-for="category"></p>
+    </div>
+
+    <div class="field">
+      <label for="question-text">2. 질문 내용</label>
+      <textarea
+        id="question-text"
+        name="question"
+        rows="7"
+        minlength="10"
+        maxlength="1000"
+        placeholder="운영진이 바로 이해할 수 있도록 상황과 궁금한 점을 적어 주세요."
+        required></textarea>
+      <div class="field-meta">
+        <span>학생·학교·강사의 개인정보나 민감정보는 입력하지 마세요.</span>
+        <span data-question-count>0 / 1,000</span>
+      </div>
+      <p class="field-error" data-error-for="question"></p>
+    </div>
+
+    <fieldset class="contact-fields">
+      <legend>3. 연락받을 방법 <span>선택</span></legend>
+      <div class="form-grid">
+        <div class="field">
+          <label for="contact-method">연락 방법</label>
+          <select id="contact-method" name="contactMethod">
+            <option value="none">연락처 남기지 않음</option>
+            <option value="kakao">카카오톡</option>
+            <option value="phone">전화·문자</option>
+            <option value="email">이메일</option>
+          </select>
+          <p class="field-error" data-error-for="contactMethod"></p>
+        </div>
+        <div class="field" data-contact-value-field hidden>
+          <label for="contact-value">연락처</label>
+          <input
+            id="contact-value"
+            name="contactValue"
+            type="text"
+            maxlength="160"
+            autocomplete="off"
+            placeholder="선택한 방법에 맞게 입력"
+          />
+          <p class="field-help">답변 안내에 필요한 최소 정보만 입력해 주세요.</p>
+          <p class="field-error" data-error-for="contactValue"></p>
+        </div>
+      </div>
+    </fieldset>
+
+    <div class="privacy-check">
+      <input id="privacy-acknowledgement" name="acknowledged" type="checkbox" />
+      <label for="privacy-acknowledgement">
+        질문에 학생 개인정보, 학교 내부 비공개 정보, 건강·계정·비밀번호 등 민감정보를 입력하지
+        않았습니다.
+      </label>
+    </div>
+    <p class="field-error" data-error-for="acknowledged"></p>
+
+    <div class="captcha-area">
+      <div>
+        <strong>4. 스팸 방지 확인</strong>
+        <p>Turnstile 검증은 실제 운영 연결 후 활성화됩니다.</p>
+      </div>
+      {
+        turnstileSiteKey ? (
+          <div
+            class="cf-turnstile"
+            data-sitekey={turnstileSiteKey}
+            data-theme="light"
+            data-action="submit-question"
+          />
+        ) : (
+          <span class="captcha-placeholder">연결 전</span>
+        )
+      }
+    </div>
+
+    <button class="button button-primary submit-button" type="submit" data-submit-question>
+      질문 접수하기
+    </button>
+    <p class="form-status" role="status" aria-live="polite" data-form-status></p>
+  </form>
+
+  <section class="receipt-card" data-receipt-card hidden aria-labelledby="receipt-title">
+    <p class="eyebrow">RECEIVED</p>
+    <h2 id="receipt-title">질문을 접수했습니다.</h2>
+    <p>아래 접수번호를 저장해 주세요. 질문 원문과 연락처는 운영진만 확인할 수 있습니다.</p>
+    <div class="receipt-code">
+      <span>접수번호</span>
+      <strong data-receipt-code></strong>
+    </div>
+    <a class="button button-primary" data-private-status-link href={statusPath}>
+      비공개 답변 확인 링크
+    </a>
+  </section>
+</section>
+
+{
+  turnstileSiteKey && (
+    <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />
+  )
+}
+
+<script>
+  import { validateQuestionDraft } from "@/lib/question-validation";
+
+  const panel = document.querySelector<HTMLElement>("[data-question-panel]");
+  const form = panel?.querySelector<HTMLFormElement>("[data-question-form]");
+  const question = form?.elements.namedItem("question") as HTMLTextAreaElement | null;
+  const contactMethod = form?.elements.namedItem("contactMethod") as HTMLSelectElement | null;
+  const contactValue = form?.elements.namedItem("contactValue") as HTMLInputElement | null;
+  const contactValueField = form?.querySelector<HTMLElement>("[data-contact-value-field]");
+  const counter = form?.querySelector<HTMLElement>("[data-question-count]");
+  const status = form?.querySelector<HTMLElement>("[data-form-status]");
+  const submit = form?.querySelector<HTMLButtonElement>("[data-submit-question]");
+  const receiptCard = panel?.querySelector<HTMLElement>("[data-receipt-card]");
+  const receiptCode = panel?.querySelector<HTMLElement>("[data-receipt-code]");
+  const privateLink = panel?.querySelector<HTMLAnchorElement>("[data-private-status-link]");
+
+  function updateContactField() {
+    if (!contactMethod || !contactValueField || !contactValue) return;
+    const needsValue = contactMethod.value !== "none";
+    contactValueField.hidden = !needsValue;
+    contactValue.required = needsValue;
+    contactValue.inputMode = contactMethod.value === "email" ? "email" : "tel";
+    contactValue.placeholder =
+      contactMethod.value === "email"
+        ? "example@email.com"
+        : contactMethod.value === "kakao"
+          ? "카카오 알림을 받을 휴대전화번호"
+          : "연락받을 휴대전화번호";
+    if (!needsValue) contactValue.value = "";
+  }
+
+  function clearErrors() {
+    form?.querySelectorAll<HTMLElement>("[data-error-for]").forEach((element) => {
+      element.textContent = "";
+    });
+    form?.querySelectorAll<HTMLElement>("[aria-invalid='true']").forEach((element) => {
+      element.removeAttribute("aria-invalid");
+    });
+  }
+
+  function showFieldError(field: string, message: string) {
+    const messageElement = form?.querySelector<HTMLElement>('[data-error-for="' + field + '"]');
+    const input = form?.elements.namedItem(field) as HTMLElement | null;
+    if (messageElement) messageElement.textContent = message;
+    input?.setAttribute("aria-invalid", "true");
+  }
+
+  question?.addEventListener("input", () => {
+    if (counter) counter.textContent = question.value.length.toLocaleString("ko-KR") + " / 1,000";
+  });
+  contactMethod?.addEventListener("change", updateContactField);
+  updateContactField();
+
+  form?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    clearErrors();
+    if (status) status.textContent = "";
+
+    const category = form.elements.namedItem("category") as HTMLSelectElement;
+    const acknowledged = form.elements.namedItem("acknowledged") as HTMLInputElement;
+    const turnstileInput = form.querySelector<HTMLInputElement>(
+      'input[name="cf-turnstile-response"]'
+    );
+    const draft = {
+      eventSlug: panel?.dataset.eventSlug ?? "",
+      category: category.value,
+      question: question?.value ?? "",
+      contactMethod: contactMethod?.value ?? "none",
+      contactValue: contactValue?.value ?? "",
+      turnstileToken: turnstileInput?.value ?? "",
+      acknowledged: Boolean(acknowledged.checked)
+    };
+    const issues = validateQuestionDraft(draft);
+    for (const issue of issues) showFieldError(issue.field, issue.message);
+    if (issues.length > 0) {
+      const first = form.querySelector<HTMLElement>("[aria-invalid='true']");
+      first?.focus();
+      if (status) status.textContent = "입력 내용을 확인해 주세요.";
+      return;
+    }
+
+    const apiBase = panel?.dataset.apiBase ?? "";
+    if (!apiBase) {
+      if (status) {
+        status.textContent =
+          "현재는 외부 접수 시스템 연결 전입니다. 입력한 내용은 전송되지 않았습니다.";
+      }
+      return;
+    }
+    if (panel?.dataset.turnstileConfigured === "true" && !draft.turnstileToken) {
+      if (status) status.textContent = "스팸 방지 확인을 완료해 주세요.";
+      return;
+    }
+
+    if (submit) {
+      submit.disabled = true;
+      submit.textContent = "안전하게 접수하는 중…";
+    }
+    try {
+      const response = await fetch(apiBase.replace(/\/$/, "") + "/submit-question", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Idempotency-Key": crypto.randomUUID()
+        },
+        body: JSON.stringify(draft)
+      });
+      const result: unknown = await response.json();
+      if (
+        !response.ok ||
+        typeof result !== "object" ||
+        result === null ||
+        !("receiptCode" in result) ||
+        !("privateToken" in result) ||
+        typeof result.receiptCode !== "string" ||
+        typeof result.privateToken !== "string"
+      ) {
+        const message =
+          typeof result === "object" &&
+          result !== null &&
+          "message" in result &&
+          typeof result.message === "string"
+            ? result.message
+            : "질문을 접수하지 못했습니다. 잠시 후 다시 시도해 주세요.";
+        throw new Error(message);
+      }
+
+      if (receiptCode) receiptCode.textContent = result.receiptCode;
+      if (privateLink) {
+        privateLink.href =
+          (panel?.dataset.statusPath ?? "") + "#token=" + encodeURIComponent(result.privateToken);
+      }
+      if (receiptCard) receiptCard.hidden = false;
+      form.hidden = true;
+      receiptCard?.scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch (error) {
+      if (status) {
+        status.textContent =
+          error instanceof Error
+            ? error.message
+            : "질문을 접수하지 못했습니다. 잠시 후 다시 시도해 주세요.";
+      }
+    } finally {
+      if (submit) {
+        submit.disabled = false;
+        submit.textContent = "질문 접수하기";
+      }
+    }
+  });
+</script>
