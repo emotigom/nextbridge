@@ -30,7 +30,7 @@ export const event2026Sk = eventConfigSchema.parse({
   },
   qr: {
     candidateShortUrl: "https://go.gomdory.com/2026-sk",
-    status: "candidate"
+    status: "verified"
   },
   ...eventContent2026Sk
 });

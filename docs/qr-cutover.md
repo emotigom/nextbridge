@@ -15,22 +15,24 @@ QR 이미지에는 위 주소만 들어갑니다. 실제 목적지는 Cloudflare
 ## 현재 상태 (2026-08-13)
 
 - `gomdory.com`은 Cloudflare 네임서버를 사용 중입니다.
-- `go.gomdory.com` DNS와 리디렉션 규칙은 아직 구성하지 않았습니다.
-- 후보 QR의 SVG/PNG를 생성했고 원본과 256px 축소본을 다시 해독해 주소가 일치함을 확인했습니다.
-- 행사 설정의 QR 상태는 `candidate`로 유지합니다. 후보 파일은 검수용이며 아직 인쇄 승인본이 아닙니다.
+- `go.gomdory.com`의 proxied DNS와 `nextbridge-2026-sk` Single Redirect가 활성 상태입니다.
+- `/2026-sk`와 `/2026-sk/`는 유효한 HTTPS로 목표 주소에 `302` 이동하고, 쿼리 문자열은 보존하지 않으며, 최종 페이지가 `200`으로 응답함을 확인했습니다.
+- QR의 SVG/PNG 원본과 256px 축소본을 다시 해독했고, 운영자 휴대전화 카메라 스캔도 통과했습니다.
+- 행사 설정의 QR 상태는 `verified`입니다. 최종 인쇄 승인 전이므로 아직 `active`는 아닙니다.
 
 ## Cloudflare 연결값
 
-Cloudflare 대시보드의 **Rules → Redirect Rules → Single Redirects**에서 다음 규칙을 만듭니다. 규칙 생성 중 `go` 호스트의 proxied DNS 레코드 생성 안내가 나오면 승인합니다.
+Cloudflare 대시보드의 **Rules → Redirect Rules → Single Redirects**에 다음 규칙이 배포되어 있습니다.
 
-| 항목              | 값                                                                                      |
-| ----------------- | --------------------------------------------------------------------------------------- |
-| 규칙 이름         | `nextbridge-2026-sk`                                                                    |
-| 일치 방식         | Custom filter expression                                                                |
-| 표현식            | `(http.host eq "go.gomdory.com" and http.request.uri.path in {"/2026-sk" "/2026-sk/"})` |
-| 대상 URL          | `https://emotigom.github.io/nextbridge/`                                                |
-| 상태 코드         | `302`                                                                                   |
-| Query string 보존 | 끔                                                                                      |
+| 항목              | 값                                                                                                                  |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------- |
+| DNS               | `A go.gomdory.com → 192.0.2.1`, Proxied                                                                             |
+| 규칙 이름         | `nextbridge-2026-sk`                                                                                                |
+| 일치 방식         | Custom filter expression                                                                                            |
+| 표현식            | `(http.host eq "go.gomdory.com" and (http.request.uri.path eq "/2026-sk" or http.request.uri.path eq "/2026-sk/"))` |
+| 대상 URL          | `https://emotigom.github.io/nextbridge/`                                                                            |
+| 상태 코드         | `302`                                                                                                               |
+| Query string 보존 | 끔                                                                                                                  |
 
 `302`를 쓰면 운영 중 목적지를 바꿀 때 브라우저의 영구 리디렉션 캐시 영향을 줄일 수 있습니다. 설정 화면에서 유료 플랜 또는 실제 비용 안내가 나타나면 결제·생성 직전에 중단하고 조건을 확인합니다.
 
@@ -41,7 +43,7 @@ Cloudflare 공식 문서:
 
 ## 새 QR 승인 게이트
 
-후보 QR 파일은 만들 수 있지만, 다음 조건이 모두 충족되기 전에는 인쇄하거나 행사 설정을 `verified`/`active`로 올리지 않습니다.
+QR은 `verified`까지 승격했습니다. 다음 조건을 모두 마치고 최종 인쇄 승인을 받기 전에는 `active`로 올리거나 인쇄하지 않습니다.
 
 - GitHub Pages 체크포인트가 CI를 통과하고 모든 자산을 `/nextbridge` 아래에서 불러옴
 - 일정·서명·협의실 정보 담당자 교차 확인
@@ -51,7 +53,7 @@ Cloudflare 공식 문서:
 - 360px 화면에서 가로 넘침, 읽기 어려운 글자, 하단 메뉴 겹침이 없음
 - 장애 시 리디렉션 목표를 예비 주소로 바꿀 운영 권한과 절차가 있음
 
-HTTPS 리디렉션과 실기기 시험을 통과하면 `verified`, 최종 인쇄 승인 후 `active`로 전환합니다.
+HTTPS 리디렉션과 운영자 실기기 카메라 시험을 통과해 `verified`로 전환했습니다. 남은 교차 기기·질문 정상 접수 점검과 최종 인쇄 승인 후 `active`로 전환합니다.
 
 ## 기존 QR 보존 전환
 
