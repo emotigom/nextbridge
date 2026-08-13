@@ -7,9 +7,9 @@ export const event2026Sk = eventConfigSchema.parse({
   year: 2026,
   receiptPrefix: "SK26",
   title: { ko: "경기 성취평가 표준화 평가도구 개발 합숙 워크숍" },
-  shortTitle: { ko: "2026 합숙 워크숍" },
+  shortTitle: { ko: "2026 경기 성취평가" },
   description: {
-    ko: "일정, 등록부 서명, 협의실, 이동 정보와 현장 질문을 한곳에서 확인하세요."
+    ko: "2026 경기 성취평가 표준화 평가도구 개발 일정 및 현장 안내"
   },
   organizer: { ko: "경기도교육청" },
   operator: { ko: "Nextbridge" },

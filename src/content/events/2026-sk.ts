@@ -14,22 +14,13 @@ type EventContent = Pick<
 export const eventContent2026Sk: EventContent = {
   announcements: [
     {
-      id: "final-guide-preparation",
-      publishedAt: "2026-08-12",
-      title: { ko: "행사 안내 페이지를 준비하고 있습니다." },
-      body: {
-        ko: "현재 일정·등록부 서명·협의실 정보를 최종 점검 중입니다. 현장 변경 사항은 이 공지 영역에 가장 먼저 반영합니다."
-      },
-      important: true
-    },
-    {
       id: "room-change-priority",
       publishedAt: "2026-08-12",
-      title: { ko: "협의실은 현장 공지를 우선해 주세요." },
+      title: { ko: "협의실 변경 시 현장 안내를 따라 주세요." },
       body: {
-        ko: "협의실은 운영 상황에 따라 바뀔 수 있습니다. 페이지 내용과 현장 안내가 다르면 최신 현장 안내를 따라 주세요."
+        ko: "현장 운영진이 안내한 장소를 우선해 주세요."
       },
-      important: false
+      important: true
     }
   ],
   signatureDays: [
@@ -341,7 +332,7 @@ export const eventContent2026Sk: EventContent = {
     {
       question: { ko: "협의실이 페이지와 다르면 어떻게 하나요?" },
       answer: {
-        ko: "현장 운영진이 안내한 최신 장소를 우선해 주세요. 변경된 내용은 공지사항에도 최대한 빠르게 반영합니다."
+        ko: "현장 운영진이 안내한 최신 장소를 우선해 주세요."
       }
     },
     {
