@@ -38,13 +38,13 @@ Supabase 기반은 실제 프로젝트에 배포했고, 참가자에게 노출�
 
 ## 플랫폼별 비밀값 위치
 
-| 값 | 저장 위치 |
-| --- | --- |
+| 값                                                         | 저장 위치                                         |
+| ---------------------------------------------------------- | ------------------------------------------------- |
 | `PUBLIC_SUPABASE_URL`, publishable key, Turnstile site key | GitHub Actions variables 또는 빌드 환경의 공개 값 |
-| Supabase secret/service key | Supabase Edge Function secrets |
-| Turnstile secret | Supabase Edge Function secrets |
-| 카카오 relay token·수신자 | Supabase Edge Function secrets |
-| Slack/Discord webhook | Supabase Edge Function secrets |
-| Cloudflare API token | 로컬/배포 자동화 secret, 프런트 번들 금지 |
+| Supabase secret/service key                                | Supabase Edge Function secrets                    |
+| Turnstile secret                                           | Supabase Edge Function secrets                    |
+| 카카오 relay token·수신자                                  | Supabase Edge Function secrets                    |
+| Slack/Discord webhook                                      | Supabase Edge Function secrets                    |
+| Cloudflare API token                                       | 로컬/배포 자동화 secret, 프런트 번들 금지         |
 
 연결 직전에는 [보안 검토](security.md)의 부정 테스트와 [행사 전 체크리스트](operations.md)를 함께 수행합니다.

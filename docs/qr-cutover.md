@@ -23,14 +23,14 @@ QR 이미지에는 위 주소만 들어갑니다. 실제 목적지는 Cloudflare
 
 Cloudflare 대시보드의 **Rules → Redirect Rules → Single Redirects**에서 다음 규칙을 만듭니다. 규칙 생성 중 `go` 호스트의 proxied DNS 레코드 생성 안내가 나오면 승인합니다.
 
-| 항목 | 값 |
-| --- | --- |
-| 규칙 이름 | `nextbridge-2026-sk` |
-| 일치 방식 | Custom filter expression |
-| 표현식 | `(http.host eq "go.gomdory.com" and http.request.uri.path in {"/2026-sk" "/2026-sk/"})` |
-| 대상 URL | `https://emotigom.github.io/nextbridge/` |
-| 상태 코드 | `302` |
-| Query string 보존 | 끔 |
+| 항목              | 값                                                                                      |
+| ----------------- | --------------------------------------------------------------------------------------- |
+| 규칙 이름         | `nextbridge-2026-sk`                                                                    |
+| 일치 방식         | Custom filter expression                                                                |
+| 표현식            | `(http.host eq "go.gomdory.com" and http.request.uri.path in {"/2026-sk" "/2026-sk/"})` |
+| 대상 URL          | `https://emotigom.github.io/nextbridge/`                                                |
+| 상태 코드         | `302`                                                                                   |
+| Query string 보존 | 끔                                                                                      |
 
 `302`를 쓰면 운영 중 목적지를 바꿀 때 브라우저의 영구 리디렉션 캐시 영향을 줄일 수 있습니다. 설정 화면에서 유료 플랜 또는 실제 비용 안내가 나타나면 결제·생성 직전에 중단하고 조건을 확인합니다.
 
