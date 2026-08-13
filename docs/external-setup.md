@@ -11,14 +11,14 @@ Supabase 기반은 실제 프로젝트에 배포했고, 참가자에게 노출�
 - 운영진: 승인된 owner 이메일 확인, 활성 `owner` 멤버십, 12자리 비밀번호 설정과 첫 정상 로그인 완료
 - Auth 반환 주소: `https://emotigom.github.io/nextbridge/admin/`
 - Turnstile: widget, 허용 출처, Edge Function secrets 4개, Pages 공개 빌드 값 연결 완료
-- 검증: 허용 출처 preflight `204`, 없는 질문 조회 `404`, 가짜 Turnstile 토큰 `TURNSTILE_REJECTED`; 클라우드 브라우저 정상 접수 시험은 Turnstile 오류 `600010`으로 보류
+- 검증: 허용 출처 preflight `204`, 없는 질문 조회 `404`, 가짜 Turnstile 토큰 `TURNSTILE_REJECTED`; 실제 휴대전화에서 정상 접수·비공개 조회·운영진 처리 종단 시험 완료 후 시험 질문 삭제·접수 재잠금
 - Cloudflare: `gomdory.com` zone, proxied `go` DNS, `302` Single Redirect 활성; HTTPS·양쪽 경로·쿼리 제거·최종 `200` 확인
 - QR: SVG/PNG 생성·해독 검증과 운영자 휴대전화 카메라 스캔 완료
 - 카카오: 공식 알림톡 공급자·relay·수신자 모두 미정
 
 ## 남은 결정과 작업
 
-1. **질문 정상 접수**: 실제 휴대전화에서 Turnstile을 포함한 질문 제출·조회·운영진 처리 흐름 확인.
+1. **운영진 추가**: 예정된 운영자 2명을 최소 권한으로 초대하고 owner/operator/viewer 역할별 화면을 합동 확인.
 2. **최종 인쇄 승인**: 필요한 iOS/Android와 Wi-Fi/모바일 데이터 교차 확인 후 QR을 `active`로 승격.
 3. **카카오 경로**: 추후 공식 알림톡 공급자 또는 기존 보안 relay, 발신 프로필, 승인 템플릿, 운영진 수신자와 참가자 완료 알림 허용 여부 결정.
 
@@ -31,10 +31,10 @@ Supabase 기반은 실제 프로젝트에 배포했고, 참가자에게 노출�
 1. Supabase 프로젝트·migration·Edge Function 배포 — 완료
 2. 운영진 Auth 이메일 확인, `owner` 멤버십, 비밀번호 설정과 첫 로그인 — 완료
 3. Turnstile widget 생성 후 Edge Function secrets와 허용 origin 연결 — 완료
-4. GitHub Pages 체크포인트에 publishable 값만 설정하고 서버 부정 시험 — 완료, 실기기 정상 접수 시험 대기
+4. GitHub Pages 체크포인트에 publishable 값만 설정하고 서버 부정 시험·실기기 정상 접수 종단 시험 — 완료
 5. 동적 QR SVG/PNG 생성, 해독 검증, Cloudflare `go` DNS·302 Single Redirect 구성 — 완료
 6. HTTPS·양쪽 경로·쿼리 제거·최종 응답과 운영자 휴대전화 카메라 스캔 — 완료, QR `verified`
-7. 실제 휴대전화 질문 정상 접수와 필요한 교차 기기 검수 후 행사·QR production 승격
+7. 필요한 교차 기기 검수와 최종 인쇄 승인 후 행사·QR production 승격
 8. 카카오 공식 알림톡 공급자 준비 후 relay/템플릿 연결 및 민감정보 미포함 확인
 
 ## 플랫폼별 비밀값 위치

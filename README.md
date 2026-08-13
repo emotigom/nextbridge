@@ -2,7 +2,7 @@
 
 교사가 휴대전화에서 일정, 등록부 서명 시간, 교과별 협의실, 오시는 길과 현장 질문을 빠르게 확인하는 행사별 정적 웹앱입니다. 프런트는 Astro로 GitHub Pages에 배포하고, 질문·답변은 Supabase Edge Functions를 유일한 공개 API 경계로 사용하도록 설계했습니다.
 
-현재 저장소에는 행사 프런트와 질문·답변 서버 경계가 구현되어 있습니다. 전용 Supabase `nextbridge-prod` 프로젝트에 스키마와 세 Edge Function을 배포했고, 승인된 owner 멤버십·허용 출처·Turnstile·공개 빌드 변수도 연결했습니다. owner의 비밀번호 설정과 첫 로그인, Cloudflare 고정 주소의 HTTPS 리디렉션, QR 휴대전화 카메라 검증까지 완료했습니다. 행사 활성화는 아직 남아 있으므로 질문 폼은 “최종 점검 중”으로 잠겨 있고 입력을 전송하지 않습니다. 카카오 알림 리소스도 아직 만들지 않았습니다.
+현재 저장소에는 행사 프런트와 질문·답변 서버 경계가 구현되어 있습니다. 전용 Supabase `nextbridge-prod` 프로젝트에 스키마와 세 Edge Function을 배포했고, 승인된 owner 멤버십·허용 출처·Turnstile·공개 빌드 변수도 연결했습니다. owner의 비밀번호 설정과 첫 로그인, 실제 휴대전화 질문 종단 시험, Cloudflare 고정 주소의 HTTPS 리디렉션, QR 휴대전화 카메라 검증까지 완료했습니다. 시험 뒤 행사와 질문 접수는 다시 비활성화했으므로 질문 폼은 “최종 점검 중”으로 잠겨 있고 입력을 전송하지 않습니다. 카카오 알림 리소스도 아직 만들지 않았습니다.
 
 ## 현재 구현 범위
 
@@ -12,6 +12,7 @@
 - PWA manifest와 같은 출처의 정적 파일만 캐시하는 서비스 워커
 - 익명 질문 폼, 접수번호/비공개 링크 조회 화면, 운영진 화면의 정보 구조
 - Supabase 스키마·RLS·권한 철회 migration과 배포된 제출/조회/운영진 Edge Function
+- 메모리 전용 인증 세션 갱신, 역할별 읽기·수정 화면, 상태 필터와 활성 탭 자동 확인
 - Turnstile 서버 검증, 원자적 속도 제한, 교체 가능한 카카오·Slack·Discord·이메일 알림 제공자 경계
 - CI, Pages 배포, 타입·테스트·빌드·대비·보안 문자열 검사
 
@@ -50,7 +51,7 @@ npm run verify
 
 - `main`에 병합되면 Pages workflow가 검증 후 `dist`를 배포합니다.
 - GitHub Pages 빌드는 `/nextbridge`, 최종 짧은 도메인 빌드는 `/`를 기준으로 합니다.
-- Supabase `nextbridge-prod`는 서울 리전에 생성되어 있으며 업무 테이블 6개와 Edge Function 3개가 배포되었습니다. 공개 publishable 값과 Turnstile도 Pages 빌드에 연결했지만 `2026-sk` 행사는 프런트와 데이터베이스 모두 비활성 상태입니다.
+- Supabase `nextbridge-prod`는 서울 리전에 생성되어 있으며 업무 테이블 6개와 Edge Function 3개가 배포되었습니다. 공개 publishable 값과 Turnstile도 Pages 빌드에 연결했고 실제 휴대전화 종단 시험을 통과했지만, `2026-sk` 행사는 최종 운영 승인 전까지 프런트와 데이터베이스 모두 비활성 상태입니다.
 - 고정 주소 `https://go.gomdory.com/2026-sk`의 proxied DNS와 `302` 리디렉션을 활성화했고, QR 생성·해독·휴대전화 카메라 검증을 마쳐 QR 상태는 `verified`입니다. 최종 인쇄 승인 전이므로 아직 `active`는 아닙니다.
 - 기존 `nextbridge-classroom-kit`의 `program-03`와 이미 인쇄된 QR 경로는 별도 승인 전까지 그대로 유지합니다.
 
