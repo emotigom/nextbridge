@@ -1,15 +1,15 @@
 {
-  "name": "Nextbridge 행사 현장지원",
-  "short_name": "현장지원",
-  "description": "교사를 위한 행사 일정, 서명, 협의실과 질문 안내",
+  "name": "2026 경기 성취평가",
+  "short_name": "경기 성취평가",
+  "description": "표준화 평가도구 개발 일정 및 현장 안내",
   "lang": "ko",
   "dir": "ltr",
   "display": "standalone",
   "orientation": "portrait-primary",
   "start_url": "./",
   "scope": "./",
-  "background_color": "#F7F7F5",
-  "theme_color": "#0A1E38",
+  "background_color": "#FDFEFE",
+  "theme_color": "#0B817A",
   "categories": ["education", "productivity"],
   "icons": [
     {

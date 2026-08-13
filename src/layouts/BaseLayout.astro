@@ -33,7 +33,7 @@ const serviceWorkerPath = withBase("/sw.js");
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#0A1E38" />
+    <meta name="theme-color" content="#0B817A" />
     <meta name="color-scheme" content="light" />
     <meta name="description" content={description} />
     {noIndex && <meta name="robots" content="noindex, nofollow" />}
@@ -46,10 +46,6 @@ const serviceWorkerPath = withBase("/sw.js");
   <body>
     <div class="page-rail" aria-hidden="true"></div>
     <a class="skip-link" href="#main-content">본문으로 바로가기</a>
-    <div class="ambient" aria-hidden="true">
-      <span class="ambient-orb ambient-orb-one"></span>
-      <span class="ambient-orb ambient-orb-two"></span>
-    </div>
     <SiteHeader currentPath={currentPath} />
     <main id="main-content">
       <slot />

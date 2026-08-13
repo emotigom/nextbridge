@@ -5,10 +5,12 @@ import { withBase } from "@/lib/paths";
 
 <section class="event-hero section-shell" aria-labelledby="event-title">
   <div class="event-hero-copy">
-    <p class="event-year">{activeEvent.year}년</p>
-    <p class="event-program">경기 성취평가 표준화 평가도구 개발</p>
-    <h1 id="event-title">합숙 워크숍</h1>
-    <div class="hero-rule" aria-hidden="true"></div>
+    <p class="event-year">{activeEvent.year}</p>
+    <h1 id="event-title">
+      <span class="event-title-primary">경기 성취평가</span>
+      <span class="event-title-secondary">표준화 평가도구 개발</span>
+      <span class="event-title-tertiary">합숙 워크숍</span>
+    </h1>
     <dl class="event-meta">
       <div>
         <dt>일자</dt>
@@ -19,24 +21,10 @@ import { withBase } from "@/lib/paths";
         <dd>{activeEvent.venue.name.ko}</dd>
       </div>
     </dl>
-    <div class="organizer-band">
-      <span>{activeEvent.organizer.ko}</span>
-      <img src={withBase("/logo-gyeonggi.png")} width="92" height="92" alt="" />
-    </div>
-    <p class="hero-lead">{activeEvent.description.ko}</p>
-  </div>
-
-  <aside class="today-card" aria-label="행사 핵심 정보">
-    <p class="today-label">현장에서 먼저 확인하세요</p>
-    <h2>등록은 교육관<br />2층 대강의실입니다.</h2>
-    <ul>
-      <li><span>기간</span><strong>8.28.(금)-8.30.(일)</strong></li>
-      <li><span>서명</span><strong>29·30일 오전/오후 각 1회</strong></li>
-      <li><span>문의</span><strong>질문 접수 후 처리 상태 확인</strong></li>
-    </ul>
-    <div class="hero-actions">
+    <p class="event-organizer">{activeEvent.organizer.ko}</p>
+    <nav class="hero-actions" aria-label="행사 바로가기">
       <a class="button button-primary" href={withBase("/schedule/")}>전체 일정 보기</a>
       <a class="button button-secondary" href={withBase("/questions/")}>운영진에게 질문</a>
-    </div>
-  </aside>
+    </nav>
+  </div>
 </section>

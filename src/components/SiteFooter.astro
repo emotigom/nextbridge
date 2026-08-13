@@ -9,12 +9,10 @@ import { withBase } from "@/lib/paths";
       <img src={withBase("/logo-symbol.png")} width="42" height="42" alt="" />
       <p>
         <strong>{activeEvent.organizer.ko}</strong>
-        <span>운영 지원 · Nextbridge</span>
+        <span>{activeEvent.year} 경기 성취평가</span>
       </p>
     </div>
-    <p class="footer-note">
-      공개가 승인된 행사 정보만 제공합니다. 학생·학교·강사의 개인정보를 질문에 입력하지 마세요.
-    </p>
+    <p class="footer-note">질문에 개인정보·민감정보를 입력하지 마세요.</p>
     <a href={withBase("/admin/")} class="operator-link">운영진 화면</a>
   </div>
 </footer>

@@ -4,7 +4,6 @@ import { activeEvent } from "@/config/events/active";
 
 <div class="visit-grid">
   <article class="visit-card location-panel">
-    <p class="eyebrow">LOCATION</p>
     <h2>{activeEvent.venue.name.ko}</h2>
     <address>
       <strong>{activeEvent.venue.address.ko}</strong>
@@ -34,7 +33,6 @@ import { activeEvent } from "@/config/events/active";
     <p class="copy-status" role="status" aria-live="polite" data-copy-status></p>
   </article>
   <article class="visit-card checklist-panel">
-    <p class="eyebrow">BEFORE YOU GO</p>
     <h2>방문 전 준비물</h2>
     <ul class="check-list">
       {

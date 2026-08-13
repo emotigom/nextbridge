@@ -21,15 +21,16 @@ function contrast(foreground: string, background: string): number {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
-describe("badge-derived design tokens", () => {
+describe("event artwork-derived design tokens", () => {
   it.each([
-    ["#111821", "#FFFFFF"],
-    ["#536172", "#FFFFFF"],
-    ["#275DA8", "#FFFFFF"],
-    ["#5B4C93", "#FFFFFF"],
-    ["#FFFFFF", "#0A1E38"],
-    ["#C8D3DF", "#0A1E38"],
-    ["#536172", "#F1EDF8"]
+    ["#0C1212", "#FDFEFE"],
+    ["#415C5A", "#FDFEFE"],
+    ["#0C4B96", "#FDFEFE"],
+    ["#0B817A", "#FDFEFE"],
+    ["#FDFEFE", "#064F4B"],
+    ["#C8E5DF", "#064F4B"],
+    ["#415C5A", "#E7F4F1"],
+    ["#FDFEFE", "#0B817A"]
   ])("keeps %s on %s at WCAG AA contrast", (foreground, background) => {
     expect(contrast(foreground, background)).toBeGreaterThanOrEqual(4.5);
   });
