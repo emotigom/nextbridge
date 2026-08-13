@@ -7,7 +7,7 @@ Supabase 기반은 실제 프로젝트에 배포했고, 참가자에게 노출�
 - Supabase 조직: `emotigom's Org` (Free)
 - 프로젝트: `nextbridge-prod`, 서울(`ap-northeast-2`), 정상 상태
 - 적용 완료: 업무 테이블 6개, 전체 RLS 강제, 브라우저 역할 직접 권한 철회, Edge Function 3개
-- 종단 검증 창: `2026-sk` 행사 `is_active = true`, 프런트 설정 `status: published`, QR 상태 `verified`
+- 안전 잠금: `2026-sk` 행사 `is_active = false`, 프런트 설정 `status: draft`, QR 상태 `verified`
 - 운영진: 승인된 owner 이메일 확인, 활성 `owner` 멤버십, 12자리 비밀번호 설정과 첫 정상 로그인 완료
 - Auth 반환 주소: `https://emotigom.github.io/nextbridge/admin/`
 - Turnstile: widget, 허용 출처, Edge Function secrets 4개, Pages 공개 빌드 값 연결 완료
