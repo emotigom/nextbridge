@@ -28,4 +28,8 @@ jobs:
           ASTRO_TELEMETRY_DISABLED: 1
           ASTRO_BASE_PATH: /nextbridge
           ASTRO_SITE_URL: https://emotigom.github.io
+          PUBLIC_SUPABASE_URL: https://cwxxhzfppvkuqvmmhgiq.supabase.co
+          PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_i3z38Xk7C2giiZPELGA5aw_FQGdzOw7
+          PUBLIC_QUESTION_API_BASE_URL: https://cwxxhzfppvkuqvmmhgiq.supabase.co/functions/v1
+          PUBLIC_TURNSTILE_SITE_KEY: 0x4AAAAAAEOocmb3Aobr0xCU
         run: npm run verify

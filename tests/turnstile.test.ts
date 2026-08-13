@@ -11,6 +11,14 @@ describe("Turnstile submission boundary", () => {
     expect(source).toContain('turnstile?.reset("#question-turnstile")');
   });
 
+  it("keeps the public form closed until the event is explicitly published", async () => {
+    const source = await readFile(formUrl, "utf8");
+    expect(source).toContain('activeEvent.status === "published"');
+    expect(source).toContain('data-event-open={isOpen ? "true" : "false"}');
+    expect(source).toContain("disabled={!isOpen}");
+    expect(source).toContain('panel?.dataset.eventOpen !== "true"');
+  });
+
   it("validates tokens on the server with action and hostname checks", async () => {
     const source = await readFile(verifierUrl, "utf8");
     expect(source).toContain("/turnstile/v0/siteverify");

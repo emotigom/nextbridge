@@ -7,15 +7,17 @@ Supabase 기반은 실제 프로젝트에 배포했고, 참가자에게 노출�
 - Supabase 조직: `emotigom's Org` (Free)
 - 프로젝트: `nextbridge-prod`, 서울(`ap-northeast-2`), 정상 상태
 - 적용 완료: 업무 테이블 6개, 전체 RLS 강제, 브라우저 역할 직접 권한 철회, Edge Function 3개
-- 안전 잠금: `2026-sk` 행사 `is_active = false`, 공개 빌드 변수 미연결, 허용 출처·Turnstile 미설정
-- 운영진: 승인된 owner 이메일의 Auth 계정과 멤버십은 아직 생성하지 않음
-- Cloudflare: `gomdory.com` zone, `go` DNS/redirect, Turnstile widget 모두 미생성
+- 안전 잠금: `2026-sk` 행사 `is_active = false`, 프런트 설정 `status: draft`, 후보 QR만 유지
+- 운영진: 승인된 owner Auth 초대와 활성 `owner` 멤버십 설정 완료, 초대 수락·첫 로그인 대기
+- Turnstile: widget, 허용 출처, Edge Function secrets 4개, Pages 공개 빌드 값 연결 완료
+- 검증: 허용 출처 preflight `204`, 없는 질문 조회 `404`, 가짜 Turnstile 토큰 `TURNSTILE_REJECTED`
+- Cloudflare: `gomdory.com` zone과 `go` DNS/redirect 미생성
 - 카카오: 공식 알림톡 공급자·relay·수신자 모두 미정
 
 ## 필요한 결정
 
-1. **운영진 계정**: Supabase Auth에서 승인된 owner 이메일 초대를 완료한 뒤 생성된 사용자 ID에 `owner` 멤버십을 부여.
-2. **Cloudflare**: `emotigom.github.io`용 Turnstile widget을 먼저 만들고, 이후 `gomdory.com` zone과 `go` DNS/redirect를 연결.
+1. **운영진 계정**: 승인된 owner가 Supabase 초대를 수락하고 비밀번호 설정·첫 로그인을 완료.
+2. **Cloudflare**: 추후 `gomdory.com` zone과 `go` DNS/redirect를 연결.
 3. **카카오 경로**: 공식 알림톡 공급자 또는 기존 보안 relay, 발신 프로필, 승인 템플릿, 운영진 수신자와 참가자 완료 알림 허용 여부.
 
 고정 주소는 `https://go.gomdory.com/2026-sk`로 선택했습니다. DNS·리디렉션·인증서·QR은 아직 만들지 않았으며 종단 간 검증 후 활성화합니다.
@@ -25,9 +27,9 @@ Supabase 기반은 실제 프로젝트에 배포했고, 참가자에게 노출�
 ## 연결 순서
 
 1. Supabase 프로젝트·migration·Edge Function 배포 — 완료
-2. 운영진 Auth 초대와 `owner` 멤버십 설정
-3. Turnstile widget 생성 후 Edge Function secrets와 허용 origin 연결
-4. GitHub Pages 체크포인트에 publishable 값만 설정해 종단 간 시험
+2. 운영진 Auth 초대와 `owner` 멤버십 설정 — 완료, 초대 수락 대기
+3. Turnstile widget 생성 후 Edge Function secrets와 허용 origin 연결 — 완료
+4. GitHub Pages 체크포인트에 publishable 값만 설정하고 서버 부정 시험 — 완료, 실기기 정상 접수 시험 대기
 5. 카카오 relay/알림톡 템플릿 연결 및 민감정보 미포함 확인
 6. Cloudflare에 `gomdory.com`을 등록하고 `go` DNS·redirect 구성
 7. 실제 휴대전화·QR 검수 후 행사와 QR 상태를 production 값으로 승격

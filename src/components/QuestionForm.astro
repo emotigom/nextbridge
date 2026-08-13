@@ -6,6 +6,8 @@ const apiBase = import.meta.env.PUBLIC_QUESTION_API_BASE_URL ?? "";
 const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "";
 const statusPath = withBase("/questions/status/");
 const isConnected = Boolean(apiBase && turnstileSiteKey);
+const isPublished = activeEvent.status === "published";
+const isOpen = isConnected && isPublished;
 ---
 
 <section
@@ -14,6 +16,7 @@ const isConnected = Boolean(apiBase && turnstileSiteKey);
   data-api-base={apiBase}
   data-status-path={statusPath}
   data-event-slug={activeEvent.slug}
+  data-event-open={isOpen ? "true" : "false"}
   data-turnstile-configured={turnstileSiteKey ? "true" : "false"}
 >
   {
@@ -23,6 +26,17 @@ const isConnected = Boolean(apiBase && turnstileSiteKey);
         <p>
           화면과 검증 구조는 준비됐지만 아직 Supabase·Turnstile이 연결되지 않았습니다. 입력한 내용은
           전송되거나 저장되지 않습니다.
+        </p>
+      </div>
+    )
+  }
+  {
+    isConnected && !isPublished && (
+      <div class="setup-banner" role="note">
+        <strong>질문 접수 최종 점검 중</strong>
+        <p>
+          Supabase·Turnstile 연결은 완료됐습니다. 운영자가 행사를 열기 전까지 입력은 전송되거나
+          저장되지 않습니다.
         </p>
       </div>
     )
@@ -99,7 +113,11 @@ const isConnected = Boolean(apiBase && turnstileSiteKey);
     <div class="captcha-area">
       <div>
         <strong>4. 스팸 방지 확인</strong>
-        <p>Turnstile 검증은 실제 운영 연결 후 활성화됩니다.</p>
+        <p>
+          {isConnected
+            ? "안전한 Turnstile 서버 검증을 사용합니다."
+            : "Turnstile 검증은 실제 운영 연결 후 활성화됩니다."}
+        </p>
       </div>
       {
         turnstileSiteKey ? (
@@ -119,8 +137,13 @@ const isConnected = Boolean(apiBase && turnstileSiteKey);
       }
     </div>
 
-    <button class="button button-primary submit-button" type="submit" data-submit-question>
-      질문 접수하기
+    <button
+      class="button button-primary submit-button"
+      type="submit"
+      data-submit-question
+      disabled={!isOpen}
+    >
+      {isOpen ? "질문 접수하기" : "최종 점검 후 접수 시작"}
     </button>
     <p class="form-status" role="status" aria-live="polite" data-form-status></p>
   </form>
@@ -209,6 +232,11 @@ const isConnected = Boolean(apiBase && turnstileSiteKey);
     event.preventDefault();
     clearErrors();
     if (status) status.textContent = "";
+
+    if (panel?.dataset.eventOpen !== "true") {
+      if (status) status.textContent = "질문 접수는 최종 점검 후 열립니다.";
+      return;
+    }
 
     const category = form.elements.namedItem("category") as HTMLSelectElement;
     const acknowledged = form.elements.namedItem("acknowledged") as HTMLInputElement;
