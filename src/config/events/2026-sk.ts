@@ -3,7 +3,7 @@ import { eventContent2026Sk } from "@/content/events/2026-sk";
 
 export const event2026Sk = eventConfigSchema.parse({
   slug: "2026-sk",
-  status: "draft",
+  status: "published",
   year: 2026,
   receiptPrefix: "SK26",
   title: { ko: "경기 성취평가 표준화 평가도구 개발 합숙 워크숍" },
