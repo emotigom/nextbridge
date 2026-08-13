@@ -47,8 +47,50 @@ const isConnected = Boolean(supabaseUrl && publishableKey && apiBase);
       <span>비밀번호</span>
       <input type="password" name="password" autocomplete="current-password" required />
     </label>
-    <button class="button button-primary" type="submit">로그인</button>
+    <div class="button-row">
+      <button class="button button-primary" type="submit">로그인</button>
+      <button class="button button-secondary" type="button" data-request-password-reset>
+        비밀번호 설정·재설정 메일 받기
+      </button>
+    </div>
     <p class="form-status" role="status" aria-live="polite" data-admin-message></p>
+  </form>
+
+  <form class="operator-login" data-password-setup hidden>
+    <div>
+      <p class="eyebrow">SECURE ACCOUNT SETUP</p>
+      <h2>운영진 비밀번호 설정</h2>
+      <p>
+        초대 또는 비밀번호 재설정 링크가 확인됐습니다. 이 화면에서만 사용할 새 비밀번호를 입력해
+        주세요.
+      </p>
+    </div>
+    <label>
+      <span>새 비밀번호</span>
+      <input
+        type="password"
+        name="password"
+        autocomplete="new-password"
+        minlength="12"
+        aria-describedby="operator-password-help"
+        required
+      />
+    </label>
+    <label>
+      <span>새 비밀번호 확인</span>
+      <input
+        type="password"
+        name="passwordConfirm"
+        autocomplete="new-password"
+        minlength="12"
+        required
+      />
+    </label>
+    <p id="operator-password-help" class="field-help">
+      12자 이상을 권장하며 다른 서비스에서 사용하지 않는 비밀번호로 설정하세요.
+    </p>
+    <button class="button button-primary" type="submit">비밀번호 저장</button>
+    <p class="form-status" role="status" aria-live="polite" data-password-setup-message></p>
   </form>
 
   <section class="operator-workspace" data-operator-workspace hidden>
@@ -89,14 +131,46 @@ const isConnected = Boolean(supabaseUrl && publishableKey && apiBase);
 
   const consoleRoot = document.querySelector<HTMLElement>("[data-admin-console]");
   const login = consoleRoot?.querySelector<HTMLFormElement>("[data-operator-login]");
+  const passwordSetup = consoleRoot?.querySelector<HTMLFormElement>("[data-password-setup]");
   const workspace = consoleRoot?.querySelector<HTMLElement>("[data-operator-workspace]");
   const loginMessage = consoleRoot?.querySelector<HTMLElement>("[data-admin-message]");
+  const passwordSetupMessage = consoleRoot?.querySelector<HTMLElement>(
+    "[data-password-setup-message]"
+  );
+  const requestPasswordReset = consoleRoot?.querySelector<HTMLButtonElement>(
+    "[data-request-password-reset]"
+  );
   const workspaceMessage = consoleRoot?.querySelector<HTMLElement>("[data-workspace-message]");
   const list = consoleRoot?.querySelector<HTMLElement>("[data-admin-question-list]");
   const refresh = consoleRoot?.querySelector<HTMLButtonElement>("[data-refresh-questions]");
   const logout = consoleRoot?.querySelector<HTMLButtonElement>("[data-operator-logout]");
   let client: SupabaseClient | null = null;
   let accessToken = "";
+  const authHash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+  const authQuery = new URLSearchParams(window.location.search);
+  const authFlowType = authHash.get("type") ?? authQuery.get("type") ?? "";
+  const authErrorCode = authHash.get("error_code") ?? authQuery.get("error_code") ?? "";
+
+  function cleanAuthUrl() {
+    if (window.location.hash || window.location.search) {
+      window.history.replaceState(null, "", window.location.pathname);
+    }
+  }
+
+  function showPasswordSetup(email?: string) {
+    if (login) login.hidden = true;
+    if (workspace) workspace.hidden = true;
+    if (passwordSetup) passwordSetup.hidden = false;
+    const emailInput = login?.elements.namedItem("email");
+    if (email && emailInput instanceof HTMLInputElement) emailInput.value = email;
+  }
+
+  function showLogin(message?: string) {
+    if (passwordSetup) passwordSetup.hidden = true;
+    if (workspace) workspace.hidden = true;
+    if (login) login.hidden = false;
+    if (message && loginMessage) loginMessage.textContent = message;
+  }
 
   function isQuestion(value: unknown): value is AdminQuestion {
     if (typeof value !== "object" || value === null) return false;
@@ -253,10 +327,103 @@ const isConnected = Boolean(supabaseUrl && publishableKey && apiBase);
       auth: {
         persistSession: false,
         autoRefreshToken: false,
-        detectSessionInUrl: false
+        detectSessionInUrl: true
       }
     });
   }
+
+  async function initializeAuthLink() {
+    if (!client) return;
+    if (authErrorCode) {
+      showLogin(
+        "인증 링크가 만료되었거나 이미 사용됐습니다. 이메일을 입력한 뒤 새 비밀번호 설정 메일을 요청해 주세요."
+      );
+      cleanAuthUrl();
+      return;
+    }
+    if (!["invite", "recovery"].includes(authFlowType)) return;
+
+    const { data, error } = await client.auth.getSession();
+    if (error || !data.session) {
+      showLogin(
+        "인증 세션을 확인하지 못했습니다. 이메일을 입력한 뒤 새 비밀번호 설정 메일을 요청해 주세요."
+      );
+      cleanAuthUrl();
+      return;
+    }
+
+    accessToken = data.session.access_token;
+    showPasswordSetup(data.session.user.email);
+    cleanAuthUrl();
+  }
+
+  void initializeAuthLink();
+
+  requestPasswordReset?.addEventListener("click", async () => {
+    if (!client || !login) return;
+    const emailInput = login.elements.namedItem("email");
+    if (!(emailInput instanceof HTMLInputElement) || !emailInput.checkValidity()) {
+      if (emailInput instanceof HTMLInputElement) emailInput.reportValidity();
+      return;
+    }
+
+    requestPasswordReset.disabled = true;
+    if (loginMessage) loginMessage.textContent = "안전한 비밀번호 설정 메일을 요청하는 중…";
+    const redirectTo = new URL(window.location.pathname, window.location.origin).toString();
+    const { error } = await client.auth.resetPasswordForEmail(emailInput.value.trim(), {
+      redirectTo
+    });
+    if (loginMessage) {
+      loginMessage.textContent = error
+        ? "메일 요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요."
+        : "계정 존재 여부와 관계없이 요청을 처리했습니다. 받은편지함에서 가장 최근 메일만 열어 주세요.";
+    }
+    requestPasswordReset.disabled = false;
+  });
+
+  passwordSetup?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!client) return;
+    const data = new FormData(passwordSetup);
+    const password = String(data.get("password") ?? "");
+    const confirmation = String(data.get("passwordConfirm") ?? "");
+    if (password.length < 12) {
+      if (passwordSetupMessage)
+        passwordSetupMessage.textContent = "비밀번호를 12자 이상 입력해 주세요.";
+      return;
+    }
+    if (password !== confirmation) {
+      if (passwordSetupMessage) passwordSetupMessage.textContent = "두 비밀번호가 서로 다릅니다.";
+      return;
+    }
+
+    const button = passwordSetup.querySelector<HTMLButtonElement>('button[type="submit"]');
+    if (button) {
+      button.disabled = true;
+      button.textContent = "비밀번호 저장 중…";
+    }
+    const { error } = await client.auth.updateUser({ password });
+    passwordSetup.reset();
+    if (error) {
+      if (passwordSetupMessage) {
+        passwordSetupMessage.textContent =
+          "비밀번호를 저장하지 못했습니다. 새 설정 메일을 다시 요청해 주세요.";
+      }
+      if (button) {
+        button.disabled = false;
+        button.textContent = "비밀번호 저장";
+      }
+      return;
+    }
+
+    accessToken = "";
+    await client.auth.signOut();
+    showLogin("비밀번호 설정을 마쳤습니다. 새 비밀번호로 로그인해 주세요.");
+    if (button) {
+      button.disabled = false;
+      button.textContent = "비밀번호 저장";
+    }
+  });
 
   login?.addEventListener("submit", async (event) => {
     event.preventDefault();

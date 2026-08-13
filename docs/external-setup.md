@@ -8,7 +8,8 @@ Supabase 기반은 실제 프로젝트에 배포했고, 참가자에게 노출�
 - 프로젝트: `nextbridge-prod`, 서울(`ap-northeast-2`), 정상 상태
 - 적용 완료: 업무 테이블 6개, 전체 RLS 강제, 브라우저 역할 직접 권한 철회, Edge Function 3개
 - 안전 잠금: `2026-sk` 행사 `is_active = false`, 프런트 설정 `status: draft`, 후보 QR만 유지
-- 운영진: 승인된 owner Auth 초대와 활성 `owner` 멤버십 설정 완료, 초대 수락·첫 로그인 대기
+- 운영진: 승인된 owner 이메일 확인과 활성 `owner` 멤버십 설정 완료, 비밀번호 설정·첫 정상 로그인 대기
+- Auth 반환 주소: `https://emotigom.github.io/nextbridge/admin/`
 - Turnstile: widget, 허용 출처, Edge Function secrets 4개, Pages 공개 빌드 값 연결 완료
 - 검증: 허용 출처 preflight `204`, 없는 질문 조회 `404`, 가짜 Turnstile 토큰 `TURNSTILE_REJECTED`
 - Cloudflare: `gomdory.com` zone과 `go` DNS/redirect 미생성
@@ -16,7 +17,7 @@ Supabase 기반은 실제 프로젝트에 배포했고, 참가자에게 노출�
 
 ## 필요한 결정
 
-1. **운영진 계정**: 승인된 owner가 Supabase 초대를 수락하고 비밀번호 설정·첫 로그인을 완료.
+1. **운영진 계정**: 승인된 owner가 운영진 화면에서 비밀번호 설정·첫 정상 로그인을 완료.
 2. **Cloudflare**: 추후 `gomdory.com` zone과 `go` DNS/redirect를 연결.
 3. **카카오 경로**: 공식 알림톡 공급자 또는 기존 보안 relay, 발신 프로필, 승인 템플릿, 운영진 수신자와 참가자 완료 알림 허용 여부.
 
@@ -27,7 +28,7 @@ Supabase 기반은 실제 프로젝트에 배포했고, 참가자에게 노출�
 ## 연결 순서
 
 1. Supabase 프로젝트·migration·Edge Function 배포 — 완료
-2. 운영진 Auth 초대와 `owner` 멤버십 설정 — 완료, 초대 수락 대기
+2. 운영진 Auth 이메일 확인과 `owner` 멤버십 설정 — 완료, 비밀번호 설정·첫 정상 로그인 대기
 3. Turnstile widget 생성 후 Edge Function secrets와 허용 origin 연결 — 완료
 4. GitHub Pages 체크포인트에 publishable 값만 설정하고 서버 부정 시험 — 완료, 실기기 정상 접수 시험 대기
 5. 카카오 relay/알림톡 템플릿 연결 및 민감정보 미포함 확인
