@@ -12,12 +12,12 @@ describe("2026-sk event configuration", () => {
     expect(event2026Sk.schedule).toHaveLength(3);
     expect(event2026Sk.signatureDays.map((day) => day.requiredCount)).toEqual([1, 2, 2]);
     expect(event2026Sk.signatureDays[1]?.windows.map((window) => window.time)).toEqual([
-      "09:00-12:00",
-      "13:00-22:00"
+      "09:00~12:00",
+      "13:00~22:00"
     ]);
     expect(event2026Sk.signatureDays[2]?.windows.map((window) => window.time)).toEqual([
-      "09:00-12:00",
-      "13:00-17:00"
+      "09:00~12:00",
+      "13:00~17:00"
     ]);
   });
 

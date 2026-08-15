@@ -27,15 +27,15 @@ export const eventContent2026Sk: EventContent = {
     {
       date: "2026-08-28",
       label: { ko: "8.28.(금)" },
-      windows: [{ label: { ko: "서명 가능" }, time: "16:00-22:00" }],
+      windows: [{ label: { ko: "서명 시간" }, time: "16:00~22:00" }],
       requiredCount: 1
     },
     {
       date: "2026-08-29",
       label: { ko: "8.29.(토)" },
       windows: [
-        { label: { ko: "오전" }, time: "09:00-12:00" },
-        { label: { ko: "오후" }, time: "13:00-22:00" }
+        { label: { ko: "오전" }, time: "09:00~12:00" },
+        { label: { ko: "오후" }, time: "13:00~22:00" }
       ],
       requiredCount: 2
     },
@@ -43,8 +43,8 @@ export const eventContent2026Sk: EventContent = {
       date: "2026-08-30",
       label: { ko: "8.30.(일)" },
       windows: [
-        { label: { ko: "오전" }, time: "09:00-12:00" },
-        { label: { ko: "오후" }, time: "13:00-17:00" }
+        { label: { ko: "오전" }, time: "09:00~12:00" },
+        { label: { ko: "오후" }, time: "13:00~17:00" }
       ],
       requiredCount: 2
     }
@@ -56,45 +56,43 @@ export const eventContent2026Sk: EventContent = {
       dayNumber: 1,
       items: [
         {
-          time: "15:30-16:00",
+          time: "15:30~16:00",
           title: { ko: "등록 및 자료 배부" },
           location: { ko: "교육관 2층 대강의실" },
           tone: "key"
         },
         {
-          time: "16:00-16:40",
+          time: "16:00~16:40",
           title: { ko: "인사 말씀 · 워크숍 일정 안내" },
-          location: { ko: "교육관 2층 대강의실" },
           tone: "default"
         },
         {
-          time: "16:40-17:30",
-          title: { ko: "성취평가 표준화 평가도구 안내" },
-          detail: { ko: "‘표준화’ 의미 공유 및 검토 유의사항 · 안산강서고 교사 정은식" },
-          location: { ko: "교육관 2층 대강의실" },
+          time: "16:40~17:30",
+          title: { ko: "‘표준화’ 의미 공유 및 검토 유의사항" },
+          detail: { ko: "안산강서고등학교 교사 정은식" },
           tone: "default"
         },
         {
-          time: "17:30-18:00",
+          time: "17:30~18:00",
           title: { ko: "숙소 확인 및 방 배정" },
           location: { ko: "교육관 2층 대강의실" },
           tone: "default"
         },
         {
-          time: "18:00-19:00",
+          time: "18:00~19:00",
           title: { ko: "저녁 식사" },
           location: { ko: "식당" },
           tone: "meal"
         },
         {
-          time: "19:00-21:00",
-          title: { ko: "과목별 작업" },
-          detail: { ko: "출제·선제·검토 및 삽화·그래픽 작업 논의" },
+          time: "19:00~21:00",
+          title: { ko: "과목별 작업(출제·선제·검토)" },
+          detail: { ko: "삽화 및 그래픽 작업 논의" },
           location: { ko: "과목별 협의실" },
           tone: "key"
         },
         {
-          time: "21:00-",
+          time: "21:00~",
           title: { ko: "개인별 작업 및 정리" },
           tone: "default"
         }
@@ -106,57 +104,57 @@ export const eventContent2026Sk: EventContent = {
       dayNumber: 2,
       items: [
         {
-          time: "08:00-09:00",
+          time: "8:00~9:00",
           title: { ko: "아침 식사" },
           location: { ko: "식당" },
           tone: "meal"
         },
         {
-          time: "09:00-12:00",
+          time: "9:00~12:00",
           title: { ko: "과목별 협의" },
-          detail: { ko: "10:00-10:30 교과 팀장 및 대표 교사 협의" },
-          location: { ko: "과목별 협의실 / 교육관 2층 대강의실" },
+          detail: { ko: "10:00~10:30 교과 팀장 및 대표 교사 협의(2층 대강의실)" },
+          location: { ko: "과목별 협의실" },
           tone: "key"
         },
         {
-          time: "12:00-13:00",
+          time: "12:00~13:00",
           title: { ko: "점심 식사" },
           location: { ko: "식당" },
           tone: "meal"
         },
         {
-          time: "13:00-15:40",
-          title: { ko: "과목별 작업" },
-          detail: { ko: "출제·선제·검토 및 삽화·그래픽 작업" },
+          time: "13:00~15:40",
+          title: { ko: "과목별 작업(출제·선제·검토)" },
+          detail: { ko: "삽화 및 그래픽 작업" },
           location: { ko: "과목별 협의실" },
           tone: "default"
         },
         {
-          time: "15:40-16:00",
+          time: "15:40~16:00",
           title: { ko: "휴식" },
           tone: "break"
         },
         {
-          time: "16:00-18:00",
+          time: "16:00~18:00",
           title: { ko: "과목별 개별 작업" },
           location: { ko: "과목별 협의실" },
           tone: "default"
         },
         {
-          time: "18:00-19:00",
+          time: "18:00~19:00",
           title: { ko: "저녁 식사" },
           location: { ko: "식당" },
           tone: "meal"
         },
         {
-          time: "19:00-20:00",
-          title: { ko: "과목별 작업" },
-          detail: { ko: "19:00-19:30 교과 팀장 협의 · 삽화 및 그래픽 작업" },
-          location: { ko: "과목별 협의실 / 교육관 2층 대강의실" },
+          time: "19:00~20:00",
+          title: { ko: "과목별 작업(출제·선제·검토)" },
+          detail: { ko: "19:00~19:30 교과 팀장 협의(2층 대강의실) · 삽화 및 그래픽 작업" },
+          location: { ko: "과목별 협의실" },
           tone: "key"
         },
         {
-          time: "20:00-",
+          time: "20:00~",
           title: { ko: "개인별 작업 및 정리" },
           tone: "default"
         }
@@ -168,33 +166,33 @@ export const eventContent2026Sk: EventContent = {
       dayNumber: 3,
       items: [
         {
-          time: "08:00-09:00",
+          time: "8:00~9:00",
           title: { ko: "아침 식사" },
           location: { ko: "식당" },
           tone: "meal"
         },
         {
-          time: "09:00-12:00",
-          title: { ko: "과목별 작업" },
-          detail: { ko: "출제·선제·검토 및 삽화·그래픽 작업" },
+          time: "9:00~12:00",
+          title: { ko: "과목별 작업(출제·선제·검토)" },
+          detail: { ko: "삽화 및 그래픽 작업" },
           location: { ko: "과목별 협의실" },
           tone: "default"
         },
         {
-          time: "12:00-13:00",
+          time: "12:00~13:00",
           title: { ko: "점심 식사" },
           location: { ko: "식당" },
           tone: "meal"
         },
         {
-          time: "13:00-16:30",
-          title: { ko: "과목별 작업 · 최종 문항 제출" },
-          detail: { ko: "삽화 및 그래픽 작업 포함" },
+          time: "13:00~16:30",
+          title: { ko: "과목별 작업(출제·선제·검토)" },
+          detail: { ko: "삽화 및 그래픽 작업 · 최종 문항 제출" },
           location: { ko: "과목별 협의실" },
           tone: "key"
         },
         {
-          time: "16:30-17:00",
+          time: "16:30~17:00",
           title: { ko: "정리 및 퇴소" },
           tone: "default"
         }
