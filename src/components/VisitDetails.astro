@@ -1,15 +1,69 @@
 ---
 import { activeEvent } from "@/config/events/active";
+
+const venueName = activeEvent.venue.name.ko;
+const venueAddress = activeEvent.venue.address.ko;
+const venueQuery = encodeURIComponent(`${venueName} ${venueAddress}`);
+const mapEmbedUrl = `https://www.google.com/maps?q=${venueQuery}&output=embed&hl=ko`;
+const directionsBaseUrl = "https://www.google.com/maps/dir/?api=1";
+const drivingDirectionsUrl =
+  `${directionsBaseUrl}&destination=${venueQuery}&travelmode=driving&dir_action=navigate`;
+const transitDirectionsUrl =
+  `${directionsBaseUrl}&destination=${venueQuery}&travelmode=transit`;
+const naverMapUrl = `https://map.naver.com/p/search/${venueQuery}`;
+const kakaoMapUrl = `https://map.kakao.com/?q=${venueQuery}`;
 ---
+
+<section class="visit-map-card" aria-labelledby="visit-map-title">
+  <div class="visit-map-frame">
+    <iframe
+      title={venueName + " 지도"}
+      src={mapEmbedUrl}
+      loading="eager"
+      referrerpolicy="no-referrer-when-downgrade"
+      allowfullscreen
+    ></iframe>
+  </div>
+
+  <div class="visit-map-summary">
+    <p class="eyebrow">행사장</p>
+    <h2 id="visit-map-title">{venueName}</h2>
+    <address>
+      <strong>{venueAddress}</strong>
+      <a href={"tel:" + activeEvent.venue.phone}>{activeEvent.venue.phone}</a>
+    </address>
+
+    <nav class="route-actions" aria-label="현재 위치에서 길찾기">
+      <a
+        class="route-button route-driving"
+        href={drivingDirectionsUrl}
+        target="_blank"
+        rel="noreferrer"
+      >
+        현재 위치 → 자동차
+      </a>
+      <a
+        class="route-button route-transit"
+        href={transitDirectionsUrl}
+        target="_blank"
+        rel="noreferrer"
+      >
+        현재 위치 → 대중교통
+      </a>
+    </nav>
+
+    <div class="map-provider-links" aria-label="지도 서비스">
+      <a href={naverMapUrl} target="_blank" rel="noreferrer">네이버지도</a>
+      <a href={kakaoMapUrl} target="_blank" rel="noreferrer">카카오맵</a>
+    </div>
+  </div>
+</section>
 
 <div class="visit-grid">
   <article class="visit-card location-panel">
-    <h2>{activeEvent.venue.name.ko}</h2>
-    <address>
-      <strong>{activeEvent.venue.address.ko}</strong>
-      <a href={"tel:" + activeEvent.venue.phone}>{activeEvent.venue.phone}</a>
-    </address>
+    <h2>도착·등록</h2>
     <dl>
+      <div><dt>주소</dt><dd>{venueAddress}</dd></div>
       <div><dt>등록</dt><dd>{activeEvent.venue.registrationLocation.ko}</dd></div>
       <div><dt>이동</dt><dd>{activeEvent.venue.transportNote.ko}</dd></div>
     </dl>
@@ -25,13 +79,14 @@ import { activeEvent } from "@/config/events/active";
       <button
         class="button button-secondary"
         type="button"
-        data-copy-address={activeEvent.venue.address.ko}
+        data-copy-address={venueAddress}
       >
         주소 복사
       </button>
     </div>
     <p class="copy-status" role="status" aria-live="polite" data-copy-status></p>
   </article>
+
   <article class="visit-card checklist-panel">
     <h2>방문 전 준비물</h2>
     <ul class="check-list">
