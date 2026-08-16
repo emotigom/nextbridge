@@ -37,6 +37,8 @@ describe("participant-facing event presentation", () => {
     expect(visitDetails).toContain("https://map.kakao.com/link/map/");
     expect(visitDetails).toContain("tmap://route?goalname=");
     expect(visitDetails).toContain("nmap://route/public");
+    expect(visitDetails).toContain("dname=${venueNavigationLabel}");
+    expect(visitDetails).toContain("${venueNavigationName} ${venueAddress}");
     expect(visitDetails).toContain("TMAP 자동차");
     expect(visitDetails).toContain("네이버지도 대중교통");
     expect(visitDetails).toContain("data-route-fallback");

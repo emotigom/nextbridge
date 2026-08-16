@@ -8,6 +8,11 @@ describe("2026-sk event configuration", () => {
     expect(event2026Sk.receiptPrefix).toBe("SK26");
   });
 
+  it("keeps the official venue name separate from the map search name", () => {
+    expect(event2026Sk.venue.name.ko).toBe("KG써닝리더십센터");
+    expect(event2026Sk.venue.navigationName?.ko).toBe("써닝리더십센터");
+  });
+
   it("contains all three days and the confirmed signature windows", () => {
     expect(event2026Sk.schedule).toHaveLength(3);
     expect(event2026Sk.signatureDays.map((day) => day.requiredCount)).toEqual([1, 2, 2]);
