@@ -14,7 +14,7 @@ const kakaoMapUrl =
 const kakaoDirectionsUrl =
   `https://map.kakao.com/link/to/${venueLabel},${venueLatitude},${venueLongitude}`;
 const tmapDrivingUrl =
-  `https://www.tmap.co.kr/tmap2/mobile/route.jsp?name=${venueLabel}&lon=${venueLongitude}&lat=${venueLatitude}`;
+  `tmap://route?goalname=${venueLabel}&goalx=${venueLongitude}&goaly=${venueLatitude}`;
 const naverTransitUrl =
   `nmap://route/public?dlat=${venueLatitude}&dlng=${venueLongitude}&dname=${venueLabel}&appname=https%3A%2F%2Femotigom.github.io%2Fnextbridge`;
 const naverMapUrl = `https://map.naver.com/p/search/${venueQuery}`;
@@ -54,8 +54,7 @@ const naverMapUrl = `https://map.naver.com/p/search/${venueQuery}`;
       <a
         class="route-button route-driving"
         href={tmapDrivingUrl}
-        target="_blank"
-        rel="noreferrer"
+        data-route-fallback={kakaoDirectionsUrl}
       >
         TMAP 자동차
       </a>
@@ -132,25 +131,27 @@ const naverMapUrl = `https://map.naver.com/p/search/${venueQuery}`;
     }
   });
 
-  const naverRoute = document.querySelector<HTMLAnchorElement>("[data-route-fallback]");
-  naverRoute?.addEventListener("click", (event) => {
-    const fallbackUrl = naverRoute.dataset.routeFallback;
-    if (!fallbackUrl) return;
+  const appRoutes = document.querySelectorAll<HTMLAnchorElement>("[data-route-fallback]");
+  appRoutes.forEach((appRoute) => {
+    appRoute.addEventListener("click", (event) => {
+      const fallbackUrl = appRoute.dataset.routeFallback;
+      if (!fallbackUrl) return;
 
-    event.preventDefault();
-    let appOpened = false;
-    const onVisibilityChange = () => {
-      if (document.hidden) appOpened = true;
-    };
+      event.preventDefault();
+      let appOpened = false;
+      const onVisibilityChange = () => {
+        if (document.hidden) appOpened = true;
+      };
 
-    document.addEventListener("visibilitychange", onVisibilityChange, { once: true });
-    window.location.href = naverRoute.href;
+      document.addEventListener("visibilitychange", onVisibilityChange, { once: true });
+      window.location.href = appRoute.href;
 
-    window.setTimeout(() => {
-      document.removeEventListener("visibilitychange", onVisibilityChange);
-      if (!appOpened && document.visibilityState === "visible") {
-        window.location.href = fallbackUrl;
-      }
-    }, 1400);
+      window.setTimeout(() => {
+        document.removeEventListener("visibilitychange", onVisibilityChange);
+        if (!appOpened && document.visibilityState === "visible") {
+          window.location.href = fallbackUrl;
+        }
+      }, 1400);
+    });
   });
 </script>
