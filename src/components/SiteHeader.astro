@@ -1,5 +1,6 @@
 ---
 import { activeEvent } from "@/config/events/active";
+import { siteNavigation } from "@/config/navigation";
 import { withBase } from "@/lib/paths";
 
 interface Props {
@@ -7,13 +8,6 @@ interface Props {
 }
 
 const { currentPath } = Astro.props;
-const links = [
-  { href: "/", label: "홈" },
-  { href: "/schedule/", label: "전체 일정" },
-  { href: "/rooms/", label: "협의실" },
-  { href: "/visit/", label: "오시는 길" },
-  { href: "/questions/", label: "질문하기" }
-];
 ---
 
 <header class="site-header">
@@ -27,12 +21,12 @@ const links = [
     </a>
     <nav class="desktop-nav" aria-label="주요 메뉴">
       {
-        links.map((link) => (
+        siteNavigation.map((link) => (
           <a
             href={withBase(link.href)}
             aria-current={currentPath === link.href ? "page" : undefined}
           >
-            {link.label}
+            {link.desktopLabel}
           </a>
         ))
       }
