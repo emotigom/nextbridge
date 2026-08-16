@@ -1,39 +1,49 @@
 ---
+import UiIcon from "@/components/UiIcon.astro";
 import { withBase } from "@/lib/paths";
 
 const actions = [
   {
     href: "/schedule/",
     number: "01",
-    title: "3일 전체 일정"
+    title: "3일 전체 일정",
+    icon: "calendar-days"
   },
   {
     href: "/rooms/",
     number: "02",
-    title: "내 교과 협의실"
+    title: "내 교과 협의실",
+    icon: "users-round"
   },
   {
     href: "/visit/",
     number: "03",
-    title: "오시는 길·준비물"
+    title: "오시는 길·준비물",
+    icon: "map-pin"
   },
   {
     href: "/questions/",
     number: "04",
-    title: "질문·답변 확인"
+    title: "질문·답변 확인",
+    icon: "message-circle-question-mark"
   }
-];
+] as const;
 ---
 
 <nav class="quick-actions section-shell" aria-label="현장 빠른 메뉴">
   {
     actions.map((action) => (
       <a href={withBase(action.href)}>
-        <span class="quick-number">{action.number}</span>
+        <span class="quick-symbol">
+          <UiIcon name={action.icon} size={23} />
+          <small>{action.number}</small>
+        </span>
         <span>
           <strong>{action.title}</strong>
         </span>
-        <i aria-hidden="true">→</i>
+        <span class="quick-arrow">
+          <UiIcon name="arrow-right" size={19} />
+        </span>
       </a>
     ))
   }
