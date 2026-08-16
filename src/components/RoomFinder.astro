@@ -1,4 +1,5 @@
 ---
+import UiIcon from "@/components/UiIcon.astro";
 import { activeEvent } from "@/config/events/active";
 ---
 
@@ -6,7 +7,9 @@ import { activeEvent } from "@/config/events/active";
   <label class="search-field">
     <span>교과명 또는 개발 과목으로 검색</span>
     <span class="search-control">
-      <i aria-hidden="true">⌕</i>
+      <span class="search-icon">
+        <UiIcon name="search" size={22} />
+      </span>
       <input
         type="search"
         inputmode="search"
@@ -36,6 +39,9 @@ import { activeEvent } from "@/config/events/active";
             .toLocaleLowerCase("ko")}
         >
           <div>
+            <span class="room-card-icon">
+              <UiIcon name="door-open" size={20} />
+            </span>
             <p>{room.floor.ko}</p>
             <strong>{room.room.ko}</strong>
           </div>
@@ -49,7 +55,9 @@ import { activeEvent } from "@/config/events/active";
     검색 결과가 없습니다. 교과명이나 과목명을 다시 확인해 주세요.
   </p>
   <p class="inline-notice neutral">
-    <span aria-hidden="true">i</span>
+    <span aria-hidden="true">
+      <UiIcon name="info" size={16} />
+    </span>
     협의실은 현장 상황에 따라 변경될 수 있습니다. 최신 현장 안내를 우선해 주세요.
   </p>
 </section>
