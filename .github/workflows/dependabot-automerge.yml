@@ -9,6 +9,7 @@ on:
       - ready_for_review
 
 permissions:
+  actions: write
   contents: write
   pull-requests: write
 
@@ -23,18 +24,21 @@ jobs:
       github.repository == 'emotigom/nextbridge' &&
       github.event.pull_request.draft == false
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
       - name: Read Dependabot metadata
         id: metadata
         uses: dependabot/fetch-metadata@21025c705c08248db411dc16f3619e6b5f9ea21a # v2.5.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Enable squash auto-merge
+      - name: Wait for verify, squash merge, and deploy
         if: >-
           steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
           steps.metadata.outputs.update-type == 'version-update:semver-minor'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_URL: ${{ github.event.pull_request.html_url }}
-        run: gh pr merge --auto --squash "$PR_URL"
+        run: |
+          gh pr checks --required --watch --fail-fast "$PR_URL"
+          gh pr merge --squash "$PR_URL"
+          gh workflow run pages.yml --ref main
