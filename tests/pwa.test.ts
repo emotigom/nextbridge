@@ -23,15 +23,32 @@ describe("PWA structure", () => {
     ]);
   });
 
-  it("precaches the core event pages for weak venue connectivity", async () => {
+  it("precaches only core event pages for weak venue connectivity", async () => {
     const worker = await readFile(new URL("../public/sw.js", import.meta.url), "utf8");
 
-    expect(worker).toContain('"nextbridge-event-support-v2"');
+    expect(worker).toContain('const CACHE_PREFIX = "nextbridge-event-support-"');
+    expect(worker).toContain('const CACHE_VERSION = "v3"');
     for (const route of ['""', '"schedule/"', '"rooms/"', '"visit/"']) {
       expect(worker).toContain(route);
     }
     expect(worker).toContain("cache.addAll(CORE_PAGES)");
-    expect(worker).not.toContain('"questions/"');
+    expect(worker).toContain('["questions/", "admin/"]');
+    expect(worker).toContain("isOnlineOnly(url)");
+  });
+
+  it("deletes only stale Nextbridge caches on the shared GitHub Pages origin", async () => {
+    const worker = await readFile(new URL("../public/sw.js", import.meta.url), "utf8");
+
+    expect(worker).toContain("key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME");
+    expect(worker).not.toContain("keys.filter((key) => key !== CACHE_NAME)");
+  });
+
+  it("waits for successful same-origin cache writes", async () => {
+    const worker = await readFile(new URL("../public/sw.js", import.meta.url), "utf8");
+
+    expect(worker).toContain('response.ok && response.type === "basic"');
+    expect(worker).toContain("await cache.put(request, response.clone())");
+    expect(worker).toContain("event.waitUntil(network.then(() => undefined))");
   });
 
   it("never caches authenticated or programmatic API responses", async () => {

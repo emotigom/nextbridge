@@ -89,54 +89,44 @@ Deno.serve(async (request) => {
         throw new HttpError(403, "답변을 변경할 권한이 없습니다.", "UPDATE_FORBIDDEN");
       }
 
-      const { data: existing, error: existingError } = await admin
-        .from("event_questions")
-        .select("id, receipt_code, status, contact_method, contact_value")
-        .eq("id", questionId)
-        .eq("event_slug", parsed.data.eventSlug)
-        .maybeSingle();
-      if (existingError) throw new Error("QUESTION_LOOKUP_FAILED");
-      if (!existing) {
+      const { data: updated, error: updateError } = await admin
+        .rpc("update_event_question", {
+          p_event_slug: parsed.data.eventSlug,
+          p_question_id: questionId,
+          p_expected_updated_at: parsed.data.expectedUpdatedAt,
+          p_status: parsed.data.status,
+          p_answer_text: parsed.data.answer || null,
+          p_actor_user_id: user.id
+        })
+        .single();
+
+      if (updateError?.code === "40001" || updateError?.message.includes("QUESTION_CONFLICT")) {
+        throw new HttpError(
+          409,
+          "다른 운영진이 먼저 저장했습니다. 최신 목록을 확인해 주세요.",
+          "QUESTION_CONFLICT"
+        );
+      }
+      if (updateError?.message.includes("QUESTION_NOT_FOUND")) {
         throw new HttpError(404, "질문을 찾지 못했습니다.", "QUESTION_NOT_FOUND");
       }
-
-      const answer = parsed.data.answer || null;
-      const answeredAt = parsed.data.status === "answered" ? new Date().toISOString() : null;
-      const { data: updated, error: updateError } = await admin
-        .from("event_questions")
-        .update({
-          status: parsed.data.status,
-          answer_text: answer,
-          answered_at: answeredAt,
-          updated_at: new Date().toISOString()
-        })
-        .eq("id", questionId)
-        .eq("event_slug", parsed.data.eventSlug)
-        .select("id, receipt_code, status, updated_at")
-        .single();
+      if (updateError?.message.includes("OPERATOR_FORBIDDEN")) {
+        throw new HttpError(403, "답변을 변경할 권한이 없습니다.", "UPDATE_FORBIDDEN");
+      }
       if (updateError || !updated) throw new Error("QUESTION_UPDATE_FAILED");
 
-      if (existing.status !== parsed.data.status) {
-        await admin.from("question_status_events").insert({
-          question_id: questionId,
-          from_status: existing.status,
-          to_status: parsed.data.status,
-          actor_user_id: user.id
-        });
-      }
-
       if (
-        existing.status !== "answered" &&
-        parsed.data.status === "answered" &&
-        existing.contact_method !== "none" &&
-        existing.contact_value
+        updated.previous_status !== "answered" &&
+        updated.question_status === "answered" &&
+        updated.participant_contact_method !== "none" &&
+        updated.participant_contact_value
       ) {
         try {
           await notifyParticipant(admin, {
-            questionId,
-            receiptCode: existing.receipt_code,
-            contactMethod: existing.contact_method,
-            contactValue: existing.contact_value,
+            questionId: updated.question_id,
+            receiptCode: updated.question_receipt_code,
+            contactMethod: updated.participant_contact_method,
+            contactValue: updated.participant_contact_value,
             eventSlug: parsed.data.eventSlug
           });
         } catch {
@@ -145,10 +135,10 @@ Deno.serve(async (request) => {
       }
 
       return jsonResponse(cors, {
-        id: updated.id,
-        receiptCode: updated.receipt_code,
-        status: updated.status,
-        updatedAt: updated.updated_at
+        id: updated.question_id,
+        receiptCode: updated.question_receipt_code,
+        status: updated.question_status,
+        updatedAt: updated.question_updated_at
       });
     }
 

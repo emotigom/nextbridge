@@ -79,6 +79,15 @@ const authErrorCode = authHash.get("error_code") ?? authQuery.get("error_code") 
 
 class SessionExpiredError extends Error {}
 
+class ApiRequestError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number
+  ) {
+    super(message);
+  }
+}
+
 function cleanAuthUrl() {
   if (window.location.hash || window.location.search) {
     window.history.replaceState(null, "", window.location.pathname);
@@ -313,7 +322,7 @@ async function api(path: string, init?: RequestInit): Promise<unknown> {
       typeof result.message === "string"
         ? result.message
         : "요청을 처리하지 못했습니다.";
-    throw new Error(message);
+    throw new ApiRequestError(message, response.status);
   }
   return result;
 }
@@ -571,6 +580,8 @@ list?.addEventListener("submit", async (event) => {
   if (!canEditQuestions(currentRole)) return;
   const card = target.closest<HTMLElement>("[data-question-id]");
   if (!card) return;
+  const question = questions.find((item) => item.id === card.dataset.questionId);
+  if (!question) return;
   const data = new FormData(target);
   const button = target.querySelector<HTMLButtonElement>('button[type="submit"]');
   if (button) {
@@ -582,6 +593,7 @@ list?.addEventListener("submit", async (event) => {
       method: "PATCH",
       body: JSON.stringify({
         eventSlug: consoleRoot?.dataset.eventSlug ?? "",
+        expectedUpdatedAt: question.updatedAt,
         status: String(data.get("status") ?? ""),
         answer: String(data.get("answer") ?? "")
       })
@@ -589,7 +601,13 @@ list?.addEventListener("submit", async (event) => {
     await loadQuestions("saved");
   } catch (error) {
     if (error instanceof SessionExpiredError) return;
-    if (workspaceMessage) {
+    if (error instanceof ApiRequestError && error.status === 409) {
+      await loadQuestions("manual");
+      if (workspaceMessage) {
+        workspaceMessage.textContent =
+          "다른 운영진의 변경을 반영했습니다. 최신 상태에서 다시 저장해 주세요.";
+      }
+    } else if (workspaceMessage) {
       workspaceMessage.textContent =
         error instanceof Error ? error.message : "답변을 저장하지 못했습니다.";
     }
