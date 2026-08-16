@@ -1,4 +1,6 @@
 const RECEIPT_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const EVENT_SLUG_PATTERN = /^[a-z0-9-]{3,80}$/;
 
 function randomBytes(length: number): Uint8Array {
   const bytes = new Uint8Array(length);
@@ -6,11 +8,20 @@ function randomBytes(length: number): Uint8Array {
   return bytes;
 }
 
-export function randomPrivateToken(): string {
-  const bytes = randomBytes(32);
-  let binary = "";
-  for (const byte of bytes) binary += String.fromCharCode(byte);
-  return btoa(binary).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "");
+export async function questionIdempotencyMaterial(
+  eventSlug: string,
+  idempotencyKey: string
+): Promise<{ keyHash: string; privateToken: string }> {
+  if (!EVENT_SLUG_PATTERN.test(eventSlug) || !UUID_PATTERN.test(idempotencyKey)) {
+    throw new Error("INVALID_IDEMPOTENCY_KEY");
+  }
+  const normalizedKey = idempotencyKey.toLowerCase();
+  return {
+    keyHash: await sha256Hex(normalizedKey),
+    privateToken: await sha256Hex(
+      "nextbridge-private-token:" + eventSlug + ":" + normalizedKey
+    )
+  };
 }
 
 export function randomReceiptCode(prefix: string): string {

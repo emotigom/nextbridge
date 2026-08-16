@@ -72,6 +72,11 @@ export const statusLookupSchema = z
 export const adminUpdateSchema = z
   .object({
     eventSlug: z.string().regex(/^[a-z0-9-]{3,80}$/),
+    expectedUpdatedAt: z
+      .string()
+      .min(20)
+      .max(64)
+      .refine((value) => Number.isFinite(Date.parse(value))),
     status: z.enum(["received", "reviewing", "answered"]),
     answer: z.string().trim().max(2000)
   })

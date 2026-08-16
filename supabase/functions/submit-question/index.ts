@@ -1,11 +1,21 @@
 import { corsForRequest, jsonResponse, preflight } from "../_shared/cors.ts";
-import { randomPrivateToken, randomReceiptCode, sha256Hex } from "../_shared/crypto.ts";
+import {
+  questionIdempotencyMaterial,
+  randomReceiptCode,
+  sha256Hex
+} from "../_shared/crypto.ts";
 import { clientIp, errorResponseBody, HttpError, readJson } from "../_shared/http.ts";
 import { notifyOperators } from "../_shared/notifications.ts";
 import { submitQuestionSchema } from "../_shared/question-schema.ts";
 import { enforceRateLimit } from "../_shared/rate-limit.ts";
 import { adminClient } from "../_shared/supabase.ts";
 import { verifyTurnstile } from "../_shared/turnstile.ts";
+
+interface CreatedQuestion {
+  question_id: string;
+  question_receipt_code: string;
+  was_created: boolean;
+}
 
 Deno.serve(async (request) => {
   const cors = corsForRequest(request);
@@ -26,14 +36,21 @@ Deno.serve(async (request) => {
       throw new HttpError(400, "입력 내용을 다시 확인해 주세요.", "VALIDATION_FAILED");
     }
 
+    const idempotencyKey = request.headers.get("x-idempotency-key")?.trim() ?? "";
+    const idempotency = await questionIdempotencyMaterial(
+      parsed.data.eventSlug,
+      idempotencyKey
+    ).catch(() => {
+      throw new HttpError(
+        400,
+        "질문 접수 정보를 다시 확인해 주세요.",
+        "INVALID_IDEMPOTENCY_KEY"
+      );
+    });
+
     const admin = adminClient();
     const ip = clientIp(request);
     await enforceRateLimit(admin, "submit", ip, 6, 10 * 60);
-
-    const idempotencyHeader = request.headers.get("x-idempotency-key")?.trim() ?? "";
-    const idempotencyKey = /^[0-9a-f-]{36}$/i.test(idempotencyHeader)
-      ? idempotencyHeader
-      : crypto.randomUUID();
     await verifyTurnstile(parsed.data.turnstileToken, ip, idempotencyKey);
 
     const { data: event, error: eventError } = await admin
@@ -47,54 +64,62 @@ Deno.serve(async (request) => {
       throw new HttpError(404, "현재 질문을 접수할 수 없는 행사입니다.", "EVENT_NOT_ACTIVE");
     }
 
-    const privateToken = randomPrivateToken();
+    const privateToken = idempotency.privateToken;
     const privateTokenHash = await sha256Hex(privateToken);
-    let questionRecord: { id: string; receipt_code: string } | null = null;
+    let questionRecord: CreatedQuestion | null = null;
 
     for (let attempt = 0; attempt < 3 && !questionRecord; attempt += 1) {
-      const receiptCode = randomReceiptCode(event.receipt_prefix);
       const { data, error } = await admin
-        .from("event_questions")
-        .insert({
-          event_slug: parsed.data.eventSlug,
-          receipt_code: receiptCode,
-          private_token_hash: privateTokenHash,
-          category: parsed.data.category,
-          question_text: parsed.data.question,
-          contact_method: parsed.data.contactMethod,
-          contact_value: parsed.data.contactMethod === "none" ? null : parsed.data.contactValue
+        .rpc("create_event_question", {
+          p_event_slug: parsed.data.eventSlug,
+          p_receipt_code: randomReceiptCode(event.receipt_prefix),
+          p_idempotency_key_hash: idempotency.keyHash,
+          p_private_token_hash: privateTokenHash,
+          p_category: parsed.data.category,
+          p_question_text: parsed.data.question,
+          p_contact_method: parsed.data.contactMethod,
+          p_contact_value:
+            parsed.data.contactMethod === "none" ? null : parsed.data.contactValue
         })
-        .select("id, receipt_code")
         .single();
 
-      if (!error && data) questionRecord = data as { id: string; receipt_code: string };
-      else if (error?.code !== "23505") throw new Error("QUESTION_INSERT_FAILED");
+      if (!error && data) {
+        questionRecord = data as CreatedQuestion;
+      } else if (
+        error?.code === "23505" &&
+        error.message.includes("QUESTION_RECEIPT_COLLISION")
+      ) {
+        continue;
+      } else if (error?.message.includes("EVENT_NOT_ACTIVE")) {
+        throw new HttpError(
+          404,
+          "현재 질문을 접수할 수 없는 행사입니다.",
+          "EVENT_NOT_ACTIVE"
+        );
+      } else {
+        throw new Error("QUESTION_INSERT_FAILED");
+      }
     }
 
     if (!questionRecord) throw new Error("QUESTION_RECEIPT_COLLISION");
 
-    await admin.from("question_status_events").insert({
-      question_id: questionRecord.id,
-      from_status: null,
-      to_status: "received",
-      actor_user_id: null
-    });
-
-    try {
-      await notifyOperators(admin, {
-        questionId: questionRecord.id,
-        receiptCode: questionRecord.receipt_code,
-        category: parsed.data.category,
-        eventSlug: parsed.data.eventSlug
-      });
-    } catch {
-      // A notification failure never loses an otherwise valid question.
+    if (questionRecord.was_created) {
+      try {
+        await notifyOperators(admin, {
+          questionId: questionRecord.question_id,
+          receiptCode: questionRecord.question_receipt_code,
+          category: parsed.data.category,
+          eventSlug: parsed.data.eventSlug
+        });
+      } catch {
+        // A notification failure never loses an otherwise valid question.
+      }
     }
 
     return jsonResponse(
       cors,
       {
-        receiptCode: questionRecord.receipt_code,
+        receiptCode: questionRecord.question_receipt_code,
         privateToken,
         status: "received"
       },
