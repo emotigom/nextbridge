@@ -28,7 +28,7 @@ describe("participant-facing event presentation", () => {
     expect(visitDetails).toContain('class="visit-map-card"');
     expect(visitDetails).toContain("https://staticmap.kakao.com/map/mapservice");
     expect(visitDetails).toContain("https://map.kakao.com/link/map/");
-    expect(visitDetails).toContain("https://www.tmap.co.kr/tmap2/mobile/route.jsp");
+    expect(visitDetails).toContain("tmap://route?goalname=");
     expect(visitDetails).toContain("nmap://route/public");
     expect(visitDetails).toContain("TMAP 자동차");
     expect(visitDetails).toContain("네이버지도 대중교통");
