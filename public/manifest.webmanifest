@@ -10,7 +10,10 @@
   "scope": "./",
   "background_color": "#FDFEFE",
   "theme_color": "#0B817A",
-  "categories": ["education", "productivity"],
+  "categories": [
+    "education",
+    "productivity"
+  ],
   "icons": [
     {
       "src": "logo-gyeonggi.png",
@@ -29,6 +32,11 @@
       "name": "협의실 찾기",
       "short_name": "협의실",
       "url": "rooms/"
+    },
+    {
+      "name": "오시는 길",
+      "short_name": "길찾기",
+      "url": "visit/"
     },
     {
       "name": "질문하기",
