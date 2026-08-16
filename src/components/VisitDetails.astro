@@ -1,4 +1,5 @@
 ---
+import UiIcon from "@/components/UiIcon.astro";
 import { activeEvent } from "@/config/events/active";
 
 const venueName = activeEvent.venue.name.ko;
@@ -56,6 +57,7 @@ const naverMapUrl = `https://map.naver.com/p/search/${venueQuery}`;
         href={tmapDrivingUrl}
         data-route-fallback={kakaoDirectionsUrl}
       >
+        <UiIcon name="car-front" size={20} />
         TMAP 자동차
       </a>
       <a
@@ -63,19 +65,26 @@ const naverMapUrl = `https://map.naver.com/p/search/${venueQuery}`;
         href={naverTransitUrl}
         data-route-fallback={naverMapUrl}
       >
+        <UiIcon name="bus-front" size={20} />
         네이버지도 대중교통
       </a>
     </nav>
 
     <div class="map-provider-links" aria-label="다른 지도 서비스">
-      <a href={kakaoDirectionsUrl} target="_blank" rel="noreferrer">카카오맵 길찾기</a>
+      <a href={kakaoDirectionsUrl} target="_blank" rel="noreferrer">
+        카카오맵 길찾기
+        <UiIcon name="external-link" size={15} />
+      </a>
     </div>
   </div>
 </section>
 
 <div class="visit-grid">
   <article class="visit-card location-panel">
-    <h2>도착·등록</h2>
+    <h2 class="visit-card-title">
+      <span><UiIcon name="map-pin" size={21} /></span>
+      도착·등록
+    </h2>
     <dl>
       <div><dt>주소</dt><dd>{venueAddress}</dd></div>
       <div><dt>등록</dt><dd>{activeEvent.venue.registrationLocation.ko}</dd></div>
@@ -83,18 +92,20 @@ const naverMapUrl = `https://map.naver.com/p/search/${venueQuery}`;
     </dl>
     <div class="button-row">
       <a
-        class="button button-primary"
+        class="button button-primary icon-button"
         href={activeEvent.venue.website}
         target="_blank"
         rel="noreferrer"
       >
+        <UiIcon name="external-link" size={17} />
         센터 홈페이지
       </a>
       <button
-        class="button button-secondary"
+        class="button button-secondary icon-button"
         type="button"
         data-copy-address={venueAddress}
       >
+        <UiIcon name="copy" size={17} />
         주소 복사
       </button>
     </div>
@@ -102,13 +113,18 @@ const naverMapUrl = `https://map.naver.com/p/search/${venueQuery}`;
   </article>
 
   <article class="visit-card checklist-panel">
-    <h2>방문 전 준비물</h2>
+    <h2 class="visit-card-title">
+      <span><UiIcon name="clipboard-check" size={21} /></span>
+      방문 전 준비물
+    </h2>
     <ul class="check-list">
       {
         activeEvent.preparation.map((item) => (
           <li>
             <>
-              <span aria-hidden="true">✓</span>
+              <span aria-hidden="true">
+                <UiIcon name="check" size={16} />
+              </span>
               <p>{item.ko}</p>
             </>
           </li>

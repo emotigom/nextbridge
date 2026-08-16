@@ -1,4 +1,5 @@
 ---
+import UiIcon from "@/components/UiIcon.astro";
 import { activeEvent } from "@/config/events/active";
 
 interface Props {
@@ -25,7 +26,12 @@ const days = compact ? activeEvent.schedule.slice(0, 1) : activeEvent.schedule;
               <div>
                 <h3>{item.title.ko}</h3>
                 {item.detail && <p>{item.detail.ko}</p>}
-                {item.location && <span>{item.location.ko}</span>}
+                {item.location && (
+                  <span class="timeline-location">
+                    <UiIcon name="map-pin" size={15} />
+                    {item.location.ko}
+                  </span>
+                )}
               </div>
             </article>
           ))}

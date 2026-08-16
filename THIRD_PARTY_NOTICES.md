@@ -20,7 +20,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ## Feather Icons
 
-The Lucide arrow-right icon is derived from Feather.
+The Lucide arrow-right, check, external-link, info, and search icons are derived from Feather.
 
 The MIT License (MIT)
 
