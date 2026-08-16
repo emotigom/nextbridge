@@ -751,14 +751,21 @@ main {
   line-height: 1.5;
 }
 
-.timeline-row span {
+.timeline-location {
+  display: inline-flex;
   width: fit-content;
+  align-items: center;
+  gap: 5px;
   margin-top: 3px;
   padding: 4px 8px;
   border-radius: 6px;
   color: var(--color-navy);
   background: var(--color-ice);
   font-weight: 750;
+}
+
+.timeline-location .ui-icon {
+  color: var(--color-blue);
 }
 
 .timeline-row.tone-key > div {
@@ -795,12 +802,20 @@ main {
   align-items: center;
 }
 
-.search-control i {
+.search-icon {
   position: absolute;
+  z-index: 1;
   left: 18px;
+  display: grid;
+  place-items: center;
   color: var(--color-purple);
-  font-size: 1.4rem;
-  font-style: normal;
+  pointer-events: none;
+  transition: transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.search-control:focus-within .search-icon {
+  color: var(--color-blue);
+  transform: scale(1.08);
 }
 
 .search-control input {
@@ -856,6 +871,17 @@ main {
 .room-card > div strong,
 .room-card > p {
   margin: 0;
+}
+
+.room-card-icon {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  margin-bottom: 3px;
+  place-items: center;
+  border-radius: 9px;
+  color: white;
+  background: rgba(255, 255, 255, 0.13);
 }
 
 .room-card > div p {
@@ -1030,11 +1056,32 @@ main {
   min-height: var(--touch-target);
   align-items: center;
   justify-content: center;
+  gap: 9px;
   padding: 13px 18px;
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
   font-weight: 850;
   text-decoration: none;
+}
+
+.route-button .ui-icon,
+.icon-button .ui-icon {
+  transition: transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.route-button:active .ui-icon,
+.icon-button:active .ui-icon {
+  transform: scale(0.9);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .route-button:hover .ui-icon {
+    transform: translateX(2px);
+  }
+
+  .icon-button:hover .ui-icon {
+    transform: translateY(-1px);
+  }
 }
 
 .route-driving {
@@ -1065,6 +1112,9 @@ main {
 }
 
 .map-provider-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   color: var(--color-blue);
   font-size: 0.82rem;
   font-weight: 800;
@@ -1087,6 +1137,26 @@ main {
 
 .visit-card h2 {
   font-size: clamp(1.7rem, 3vw, 2.4rem);
+}
+
+.visit-card-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.visit-card-title > span {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border-radius: 11px;
+  color: var(--color-blue);
+  background: var(--color-ice);
+}
+
+.icon-button {
+  gap: 8px;
 }
 
 .location-panel address {
@@ -2375,7 +2445,10 @@ main {
 
   .quick-symbol .ui-icon,
   .quick-arrow,
-  .bottom-nav-icon {
+  .bottom-nav-icon,
+  .search-icon,
+  .route-button .ui-icon,
+  .icon-button .ui-icon {
     transition: none !important;
   }
 
@@ -2383,7 +2456,12 @@ main {
   .quick-actions a:hover .quick-arrow,
   .quick-actions a:active .quick-symbol .ui-icon,
   .bottom-nav a[aria-current="page"] .bottom-nav-icon,
-  .bottom-nav a:active .bottom-nav-icon {
+  .bottom-nav a:active .bottom-nav-icon,
+  .search-control:focus-within .search-icon,
+  .route-button:hover .ui-icon,
+  .route-button:active .ui-icon,
+  .icon-button:hover .ui-icon,
+  .icon-button:active .ui-icon {
     transform: none !important;
   }
 }
