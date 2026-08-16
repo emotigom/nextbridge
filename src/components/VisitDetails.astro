@@ -3,11 +3,13 @@ import UiIcon from "@/components/UiIcon.astro";
 import { activeEvent } from "@/config/events/active";
 
 const venueName = activeEvent.venue.name.ko;
+const venueNavigationName = activeEvent.venue.navigationName?.ko ?? venueName;
 const venueAddress = activeEvent.venue.address.ko;
 const venueLatitude = 37.1472473;
 const venueLongitude = 127.4202277;
 const venueLabel = encodeURIComponent(venueName);
-const venueQuery = encodeURIComponent(`${venueName} ${venueAddress}`);
+const venueNavigationLabel = encodeURIComponent(venueNavigationName);
+const venueQuery = encodeURIComponent(`${venueNavigationName} ${venueAddress}`);
 const kakaoStaticMapUrl =
   "https://staticmap.kakao.com/map/mapservice?FORMAT=PNG&SCALE=2.5&MX=593230&MY=1013627&S=0&IW=504&IH=310&LANG=0&COORDSTM=WCONGNAMUL&logo=kakao_logo";
 const kakaoMapUrl =
@@ -17,7 +19,7 @@ const kakaoDirectionsUrl =
 const tmapDrivingUrl =
   `tmap://route?goalname=${venueLabel}&goalx=${venueLongitude}&goaly=${venueLatitude}`;
 const naverTransitUrl =
-  `nmap://route/public?dlat=${venueLatitude}&dlng=${venueLongitude}&dname=${venueLabel}&appname=https%3A%2F%2Femotigom.github.io%2Fnextbridge`;
+  `nmap://route/public?dlat=${venueLatitude}&dlng=${venueLongitude}&dname=${venueNavigationLabel}&appname=https%3A%2F%2Femotigom.github.io%2Fnextbridge`;
 const naverMapUrl = `https://map.naver.com/p/search/${venueQuery}`;
 ---
 

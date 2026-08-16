@@ -30,6 +30,7 @@ export const eventConfigSchema = z.object({
   }),
   venue: z.object({
     name: localizedTextSchema,
+    navigationName: localizedTextSchema.optional(),
     address: localizedTextSchema,
     phone: z.string().min(1),
     website: z.url(),

@@ -20,6 +20,7 @@ export const event2026Sk = eventConfigSchema.parse({
   },
   venue: {
     name: { ko: "KG써닝리더십센터" },
+    navigationName: { ko: "써닝리더십센터" },
     address: { ko: "경기도 용인시 처인구 백암면 고안로51번길 205" },
     phone: "031-329-0705",
     website: "https://www.sunningleader.co.kr/",
