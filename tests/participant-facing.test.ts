@@ -26,14 +26,16 @@ describe("participant-facing event presentation", () => {
     const visitDetails = await readFile(visitDetailsUrl, "utf8");
 
     expect(visitDetails).toContain('class="visit-map-card"');
-    expect(visitDetails).toContain("https://www.google.com/maps?q=");
-    expect(visitDetails).toContain("output=embed");
-    expect(visitDetails).toContain("travelmode=driving");
-    expect(visitDetails).toContain("travelmode=transit");
-    expect(visitDetails).toContain("현재 위치 → 자동차");
-    expect(visitDetails).toContain("현재 위치 → 대중교통");
+    expect(visitDetails).toContain("https://staticmap.kakao.com/map/mapservice");
+    expect(visitDetails).toContain("https://map.kakao.com/link/map/");
+    expect(visitDetails).toContain("tmap://route?goalname=");
+    expect(visitDetails).toContain("nmap://route/public");
+    expect(visitDetails).toContain("TMAP 자동차");
+    expect(visitDetails).toContain("네이버지도 대중교통");
+    expect(visitDetails).toContain("data-route-fallback");
     expect(visitDetails).toContain("https://map.naver.com/p/search/");
-    expect(visitDetails).toContain("https://map.kakao.com/?q=");
+    expect(visitDetails).toContain("https://map.kakao.com/link/to/");
+    expect(visitDetails).not.toContain("https://www.google.com/maps");
   });
 
   it("uses the supplied teal, blue, and mint palette without decorative artwork", async () => {
