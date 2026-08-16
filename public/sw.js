@@ -1,8 +1,11 @@
-const CACHE_NAME = "nextbridge-event-support-v1";
+const CACHE_NAME = "nextbridge-event-support-v2";
 const APP_ROOT = new URL("./", self.location.href).href;
+const CORE_PAGES = ["", "schedule/", "rooms/", "visit/"].map(
+  (path) => new URL(path, APP_ROOT).href
+);
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.add(APP_ROOT)));
+  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(CORE_PAGES)));
   self.skipWaiting();
 });
 

@@ -15,6 +15,23 @@ describe("PWA structure", () => {
     expect(manifest.scope).toBe("./");
     expect(manifest.icons.every((icon) => !icon.src.startsWith("/"))).toBe(true);
     expect(manifest.shortcuts.every((shortcut) => !shortcut.url.startsWith("/"))).toBe(true);
+    expect(manifest.shortcuts.map((shortcut) => shortcut.url)).toEqual([
+      "schedule/",
+      "rooms/",
+      "visit/",
+      "questions/"
+    ]);
+  });
+
+  it("precaches the core event pages for weak venue connectivity", async () => {
+    const worker = await readFile(new URL("../public/sw.js", import.meta.url), "utf8");
+
+    expect(worker).toContain('"nextbridge-event-support-v2"');
+    for (const route of ['""', '"schedule/"', '"rooms/"', '"visit/"']) {
+      expect(worker).toContain(route);
+    }
+    expect(worker).toContain("cache.addAll(CORE_PAGES)");
+    expect(worker).not.toContain('"questions/"');
   });
 
   it("never caches authenticated or programmatic API responses", async () => {
