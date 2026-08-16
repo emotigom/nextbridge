@@ -1,6 +1,8 @@
 ---
 import { activeEvent } from "@/config/events/active";
 import { withBase } from "@/lib/paths";
+
+const heroDate = activeEvent.dates.display.ko.replace(`${activeEvent.year}. `, "");
 ---
 
 <section class="event-hero section-shell" aria-labelledby="event-title">
@@ -14,7 +16,7 @@ import { withBase } from "@/lib/paths";
     <dl class="event-meta">
       <div>
         <dt>일자</dt>
-        <dd>{activeEvent.dates.display.ko}</dd>
+        <dd>{heroDate}</dd>
       </div>
       <div>
         <dt>장소</dt>
