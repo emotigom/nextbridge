@@ -3,26 +3,43 @@ import { activeEvent } from "@/config/events/active";
 
 const venueName = activeEvent.venue.name.ko;
 const venueAddress = activeEvent.venue.address.ko;
+const venueLatitude = 37.1472473;
+const venueLongitude = 127.4202277;
+const venueLabel = encodeURIComponent(venueName);
 const venueQuery = encodeURIComponent(`${venueName} ${venueAddress}`);
-const mapEmbedUrl = `https://www.google.com/maps?q=${venueQuery}&output=embed&hl=ko`;
-const directionsBaseUrl = "https://www.google.com/maps/dir/?api=1";
-const drivingDirectionsUrl =
-  `${directionsBaseUrl}&destination=${venueQuery}&travelmode=driving&dir_action=navigate`;
-const transitDirectionsUrl =
-  `${directionsBaseUrl}&destination=${venueQuery}&travelmode=transit`;
+const kakaoStaticMapUrl =
+  "https://staticmap.kakao.com/map/mapservice?FORMAT=PNG&SCALE=2.5&MX=593230&MY=1013627&S=0&IW=504&IH=310&LANG=0&COORDSTM=WCONGNAMUL&logo=kakao_logo";
+const kakaoMapUrl =
+  `https://map.kakao.com/link/map/${venueLabel},${venueLatitude},${venueLongitude}`;
+const kakaoDirectionsUrl =
+  `https://map.kakao.com/link/to/${venueLabel},${venueLatitude},${venueLongitude}`;
+const tmapDrivingUrl =
+  `https://www.tmap.co.kr/tmap2/mobile/route.jsp?name=${venueLabel}&lon=${venueLongitude}&lat=${venueLatitude}`;
+const naverTransitUrl =
+  `nmap://route/public?dlat=${venueLatitude}&dlng=${venueLongitude}&dname=${venueLabel}&appname=https%3A%2F%2Femotigom.github.io%2Fnextbridge`;
 const naverMapUrl = `https://map.naver.com/p/search/${venueQuery}`;
-const kakaoMapUrl = `https://map.kakao.com/?q=${venueQuery}`;
 ---
 
 <section class="visit-map-card" aria-labelledby="visit-map-title">
   <div class="visit-map-frame">
-    <iframe
-      title={venueName + " 지도"}
-      src={mapEmbedUrl}
-      loading="eager"
-      referrerpolicy="no-referrer-when-downgrade"
-      allowfullscreen
-    ></iframe>
+    <a
+      class="visit-map-link"
+      href={kakaoMapUrl}
+      target="_blank"
+      rel="noreferrer"
+      aria-label={venueName + " 카카오맵 크게 보기"}
+    >
+      <img
+        src={kakaoStaticMapUrl}
+        width="504"
+        height="310"
+        alt={venueName + " 주변 카카오맵"}
+        loading="eager"
+        decoding="async"
+      />
+      <span class="visit-map-marker" aria-hidden="true"></span>
+      <span class="visit-map-open">카카오맵 크게 보기</span>
+    </a>
   </div>
 
   <div class="visit-map-summary">
@@ -36,25 +53,23 @@ const kakaoMapUrl = `https://map.kakao.com/?q=${venueQuery}`;
     <nav class="route-actions" aria-label="현재 위치에서 길찾기">
       <a
         class="route-button route-driving"
-        href={drivingDirectionsUrl}
+        href={tmapDrivingUrl}
         target="_blank"
         rel="noreferrer"
       >
-        현재 위치 → 자동차
+        TMAP 자동차
       </a>
       <a
         class="route-button route-transit"
-        href={transitDirectionsUrl}
-        target="_blank"
-        rel="noreferrer"
+        href={naverTransitUrl}
+        data-route-fallback={naverMapUrl}
       >
-        현재 위치 → 대중교통
+        네이버지도 대중교통
       </a>
     </nav>
 
-    <div class="map-provider-links" aria-label="지도 서비스">
-      <a href={naverMapUrl} target="_blank" rel="noreferrer">네이버지도</a>
-      <a href={kakaoMapUrl} target="_blank" rel="noreferrer">카카오맵</a>
+    <div class="map-provider-links" aria-label="다른 지도 서비스">
+      <a href={kakaoDirectionsUrl} target="_blank" rel="noreferrer">카카오맵 길찾기</a>
     </div>
   </div>
 </section>
@@ -115,5 +130,27 @@ const kakaoMapUrl = `https://map.kakao.com/?q=${venueQuery}`;
     } catch {
       if (copyStatus) copyStatus.textContent = "주소를 길게 눌러 직접 복사해 주세요.";
     }
+  });
+
+  const naverRoute = document.querySelector<HTMLAnchorElement>("[data-route-fallback]");
+  naverRoute?.addEventListener("click", (event) => {
+    const fallbackUrl = naverRoute.dataset.routeFallback;
+    if (!fallbackUrl) return;
+
+    event.preventDefault();
+    let appOpened = false;
+    const onVisibilityChange = () => {
+      if (document.hidden) appOpened = true;
+    };
+
+    document.addEventListener("visibilitychange", onVisibilityChange, { once: true });
+    window.location.href = naverRoute.href;
+
+    window.setTimeout(() => {
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      if (!appOpened && document.visibilityState === "visible") {
+        window.location.href = fallbackUrl;
+      }
+    }, 1400);
   });
 </script>
