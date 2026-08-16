@@ -19,7 +19,7 @@ describe("mobile-first layout safeguards", () => {
     expect(mobile).toContain(".room-grid");
     expect(mobile).toContain("grid-template-columns: 1fr;");
     expect(mobile).toContain(".bottom-nav");
-    expect(mobile).toContain("grid-template-columns: repeat(4, 1fr);");
+    expect(mobile).toContain("grid-template-columns: repeat(5, 1fr);");
     expect(mobile).toContain("min-width: 0;");
   });
 
