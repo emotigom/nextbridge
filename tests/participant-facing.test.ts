@@ -3,6 +3,9 @@ import { describe, expect, it } from "vitest";
 
 const heroUrl = new URL("../src/components/EventHero.astro", import.meta.url);
 const visitDetailsUrl = new URL("../src/components/VisitDetails.astro", import.meta.url);
+const scheduleListUrl = new URL("../src/components/ScheduleList.astro", import.meta.url);
+const roomFinderUrl = new URL("../src/components/RoomFinder.astro", import.meta.url);
+const signatureGuideUrl = new URL("../src/components/SignatureGuide.astro", import.meta.url);
 const bottomNavUrl = new URL("../src/components/BottomNav.astro", import.meta.url);
 const quickActionsUrl = new URL("../src/components/QuickActions.astro", import.meta.url);
 const uiIconUrl = new URL("../src/components/UiIcon.astro", import.meta.url);
@@ -64,6 +67,35 @@ describe("participant-facing event presentation", () => {
     expect(uiIcon).toContain('focusable="false"');
     expect(css).toContain("grid-template-columns: repeat(5, 1fr);");
     expect(css).toContain("@media (prefers-reduced-motion: reduce)");
+  });
+
+  it("uses semantic icons for schedule, rooms, travel actions, and notices", async () => {
+    const [scheduleList, roomFinder, visitDetails, signatureGuide, uiIcon, css] =
+      await Promise.all([
+        readFile(scheduleListUrl, "utf8"),
+        readFile(roomFinderUrl, "utf8"),
+        readFile(visitDetailsUrl, "utf8"),
+        readFile(signatureGuideUrl, "utf8"),
+        readFile(uiIconUrl, "utf8"),
+        readFile(stylesheetUrl, "utf8")
+      ]);
+
+    expect(scheduleList).toContain('class="timeline-location"');
+    expect(scheduleList).toContain('name="map-pin"');
+    expect(roomFinder).toContain('name="search"');
+    expect(roomFinder).toContain('name="door-open"');
+    expect(roomFinder).toContain('name="info"');
+    expect(roomFinder).not.toContain("⌕");
+    expect(visitDetails).toContain('name="car-front"');
+    expect(visitDetails).toContain('name="bus-front"');
+    expect(visitDetails).toContain('name="copy"');
+    expect(visitDetails).toContain('name="external-link"');
+    expect(visitDetails).toContain('name="clipboard-check"');
+    expect(signatureGuide).toContain('name="check"');
+    expect(signatureGuide).not.toContain(">✓<");
+    expect(uiIcon).toContain('"clipboard-check"');
+    expect(css).toContain(".search-control:focus-within .search-icon");
+    expect(css).toContain(".route-button:active .ui-icon");
   });
 
   it("uses the supplied teal, blue, and mint palette without decorative artwork", async () => {
