@@ -17,6 +17,16 @@ function validUuid(value: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
+interface UpdatedQuestion {
+  question_id: string;
+  question_receipt_code: string;
+  question_status: "received" | "reviewing" | "answered";
+  question_updated_at: string;
+  previous_status: "received" | "reviewing" | "answered";
+  participant_contact_method: "none" | "email" | "phone" | "kakao";
+  participant_contact_value: string | null;
+}
+
 Deno.serve(async (request) => {
   const cors = corsForRequest(request);
   const options = preflight(request, cors);
@@ -114,19 +124,20 @@ Deno.serve(async (request) => {
         throw new HttpError(403, "답변을 변경할 권한이 없습니다.", "UPDATE_FORBIDDEN");
       }
       if (updateError || !updated) throw new Error("QUESTION_UPDATE_FAILED");
+      const updatedQuestion = updated as UpdatedQuestion;
 
       if (
-        updated.previous_status !== "answered" &&
-        updated.question_status === "answered" &&
-        updated.participant_contact_method !== "none" &&
-        updated.participant_contact_value
+        updatedQuestion.previous_status !== "answered" &&
+        updatedQuestion.question_status === "answered" &&
+        updatedQuestion.participant_contact_method !== "none" &&
+        updatedQuestion.participant_contact_value
       ) {
         try {
           await notifyParticipant(admin, {
-            questionId: updated.question_id,
-            receiptCode: updated.question_receipt_code,
-            contactMethod: updated.participant_contact_method,
-            contactValue: updated.participant_contact_value,
+            questionId: updatedQuestion.question_id,
+            receiptCode: updatedQuestion.question_receipt_code,
+            contactMethod: updatedQuestion.participant_contact_method,
+            contactValue: updatedQuestion.participant_contact_value,
             eventSlug: parsed.data.eventSlug
           });
         } catch {
@@ -135,10 +146,10 @@ Deno.serve(async (request) => {
       }
 
       return jsonResponse(cors, {
-        id: updated.question_id,
-        receiptCode: updated.question_receipt_code,
-        status: updated.question_status,
-        updatedAt: updated.question_updated_at
+        id: updatedQuestion.question_id,
+        receiptCode: updatedQuestion.question_receipt_code,
+        status: updatedQuestion.question_status,
+        updatedAt: updatedQuestion.question_updated_at
       });
     }
 
