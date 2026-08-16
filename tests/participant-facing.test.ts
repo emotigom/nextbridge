@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 
 const heroUrl = new URL("../src/components/EventHero.astro", import.meta.url);
+const visitDetailsUrl = new URL("../src/components/VisitDetails.astro", import.meta.url);
 const stylesheetUrl = new URL("../src/styles/global.css", import.meta.url);
 
 describe("participant-facing event presentation", () => {
@@ -19,6 +20,20 @@ describe("participant-facing event presentation", () => {
     expect(hero).not.toContain("today-card");
     expect(hero).not.toContain("hero-lead");
     expect(hero).not.toContain("organizer-band");
+  });
+
+  it("shows the venue map and current-location routes for both travel modes", async () => {
+    const visitDetails = await readFile(visitDetailsUrl, "utf8");
+
+    expect(visitDetails).toContain('class="visit-map-card"');
+    expect(visitDetails).toContain("https://www.google.com/maps?q=");
+    expect(visitDetails).toContain("output=embed");
+    expect(visitDetails).toContain("travelmode=driving");
+    expect(visitDetails).toContain("travelmode=transit");
+    expect(visitDetails).toContain("현재 위치 → 자동차");
+    expect(visitDetails).toContain("현재 위치 → 대중교통");
+    expect(visitDetails).toContain("https://map.naver.com/p/search/");
+    expect(visitDetails).toContain("https://map.kakao.com/?q=");
   });
 
   it("uses the supplied teal, blue, and mint palette without decorative artwork", async () => {
