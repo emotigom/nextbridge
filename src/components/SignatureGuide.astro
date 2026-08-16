@@ -1,4 +1,5 @@
 ---
+import UiIcon from "@/components/UiIcon.astro";
 import { activeEvent } from "@/config/events/active";
 ---
 
@@ -36,7 +37,9 @@ import { activeEvent } from "@/config/events/active";
     }
   </div>
   <p class="inline-notice">
-    <span aria-hidden="true">✓</span>
+    <span aria-hidden="true">
+      <UiIcon name="check" size={16} />
+    </span>
     8월 29일·30일: 오전·오후 각 1회 서명
   </p>
 </section>
