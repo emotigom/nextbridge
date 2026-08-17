@@ -36,6 +36,8 @@ Cloudflare 대시보드의 **Rules → Redirect Rules → Single Redirects**에 
 
 `302`를 쓰면 운영 중 목적지를 바꿀 때 브라우저의 영구 리디렉션 캐시 영향을 줄일 수 있습니다. 설정 화면에서 유료 플랜 또는 실제 비용 안내가 나타나면 결제·생성 직전에 중단하고 조건을 확인합니다.
 
+Single Redirect는 대상 상태를 확인하지 않는 고정 리디렉션입니다. 현재 자동 fallback은 구성하지 않았으며, `nextbridge-classroom-kit`의 기존 경로도 같은 GitHub Pages를 사용하므로 제공자 전체 장애를 피하는 가용성 fallback으로 보지 않습니다. Notion으로 이어지는 추가 fallback도 두지 않습니다.
+
 Cloudflare 공식 문서:
 
 - [대시보드에서 Single Redirect 만들기](https://developers.cloudflare.com/rules/url-forwarding/single-redirects/create-dashboard/)
@@ -51,13 +53,13 @@ QR은 `verified`까지 승격했습니다. 다음 조건을 모두 마치고 최
 - `go.gomdory.com/2026-sk`가 HTTPS로 정상 응답하고 목표 주소로 이동
 - iOS/Android 실제 휴대전화, Wi-Fi/모바일 데이터, 카메라 앱에서 QR 검증
 - 360px 화면에서 가로 넘침, 읽기 어려운 글자, 하단 메뉴 겹침이 없음
-- 장애 시 리디렉션 목표를 예비 주소로 바꿀 운영 권한과 절차가 있음
+- 독립 비상 페이지를 별도로 승인한 경우에만 장애 시 리디렉션 목표를 수동 변경할 운영 권한과 절차가 있음
 
 HTTPS 리디렉션과 운영자 실기기 카메라 시험을 통과해 `verified`로 전환했습니다. 남은 교차 기기·질문 정상 접수 점검과 최종 인쇄 승인 후 `active`로 전환합니다.
 
 ## 기존 QR 보존 전환
 
-새 사이트가 위 게이트를 통과한 뒤에만 `nextbridge-classroom-kit`에 별도 PR을 만듭니다. 한 번에 기존 경로를 삭제하지 않습니다.
+새 사이트가 위 게이트를 통과한 뒤에만 `nextbridge-classroom-kit`에 별도 PR을 만듭니다. 이 경로는 가용성 fallback이 아니라 이미 배포·인쇄된 링크의 호환 경로이며, 한 번에 삭제하지 않습니다.
 
 1. README와 검색·메뉴·`programs/program-03/manifest.json`에서 기존 상세 페이지 노출을 제거합니다.
 2. `programs/program-03/guide/`의 상세 콘텐츠 제공을 종료합니다.
@@ -69,4 +71,4 @@ HTTPS 리디렉션과 운영자 실기기 카메라 시험을 통과해 `verifie
 
 ## 롤백
 
-새 서비스에 문제가 생기면 고정 주소의 리디렉션 목표만 이전의 검증된 안내 페이지나 읽기 전용 비상 페이지로 바꿉니다. 구형 경로를 미리 삭제하지 않으므로 인쇄된 구형 QR도 복구 경로를 유지합니다.
+개별 배포가 실패하면 마지막 정상 GitHub Pages 배포를 유지하고 Pages workflow를 재실행합니다. GitHub Pages 전체 장애에는 자동 전환하지 않습니다. 별도 제공자에 둔 읽기 전용 비상 페이지가 사전에 승인되고 공개·모바일 시험까지 통과한 경우에만 고정 주소의 목적지를 수동 변경하며, 그런 페이지가 없으면 현장 안내를 사용합니다. 구형 QR 경로는 링크 호환을 위해 유지하지만 같은 제공자 장애의 복구 경로로 간주하지 않습니다.

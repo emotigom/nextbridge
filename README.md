@@ -53,7 +53,7 @@ npm run verify
 - GitHub Pages 빌드는 `/nextbridge`, 최종 짧은 도메인 빌드는 `/`를 기준으로 합니다.
 - Supabase `nextbridge-prod`는 서울 리전에 생성되어 있으며 업무 테이블 6개와 Edge Function 3개가 배포되었습니다. 공개 publishable 값과 Turnstile도 Pages 빌드에 연결했고 실제 휴대전화 종단 시험을 통과했지만, `2026-sk` 행사는 최종 운영 승인 전까지 프런트와 데이터베이스 모두 비활성 상태입니다.
 - 고정 주소 `https://go.gomdory.com/2026-sk`의 proxied DNS와 `302` 리디렉션을 활성화했고, QR 생성·해독·휴대전화 카메라 검증을 마쳐 QR 상태는 `verified`입니다. 최종 인쇄 승인 전이므로 아직 `active`는 아닙니다.
-- 기존 `nextbridge-classroom-kit`의 `program-03`와 이미 인쇄된 QR 경로는 별도 승인 전까지 그대로 유지합니다.
+- 이 고정 리디렉션에는 상태 확인이나 자동 fallback이 없습니다. 기존 `nextbridge-classroom-kit`의 `program-03`는 같은 GitHub Pages를 사용하므로 가용성 fallback이 아니라 이미 인쇄된 구형 QR의 호환 경로로만 유지합니다.
 
 자세한 순서는 [QR 전환 계획](docs/qr-cutover.md)을 따릅니다.
 
