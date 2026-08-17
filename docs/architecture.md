@@ -54,4 +54,6 @@ stateDiagram-v2
 
 GitHub Pages 체크포인트는 `https://emotigom.github.io/nextbridge/` 하위 경로를 사용합니다. 최종 인쇄 QR은 Cloudflare가 관리하는 짧은 도메인 주소를 향하고, 그 주소가 현재 배포 위치로 리디렉션합니다. 호스팅을 바꾸더라도 인쇄물은 유지할 수 있습니다.
 
+현재 Cloudflare Single Redirect는 고정 `302`이며 대상 상태 확인이나 자동 fallback을 수행하지 않습니다. `nextbridge-classroom-kit`의 기존 경로도 같은 GitHub Pages에 있으므로 독립적인 가용성 fallback으로 보지 않습니다.
+
 외부 리소스 연결 전에는 질문 UI가 의도적으로 네트워크 전송을 중단합니다. 정적 안내 기능과 서버 기능을 독립적으로 출시·롤백할 수 있는 구조입니다.

@@ -38,7 +38,22 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          REPOSITORY: ${{ github.repository }}
         run: |
           gh pr checks --required --watch --fail-fast "$PR_URL"
-          gh pr merge --squash "$PR_URL"
-          gh workflow run pages.yml --ref main
+          if ! gh api \
+            --method PUT \
+            "repos/$REPOSITORY/pulls/$PR_NUMBER/merge" \
+            -f merge_method=squash \
+            -f sha="$HEAD_SHA" \
+            --silent
+          then
+            test "$(gh api "repos/$REPOSITORY/pulls/$PR_NUMBER" --jq .merged)" = "true"
+          fi
+          gh api \
+            --method POST \
+            "repos/$REPOSITORY/actions/workflows/pages.yml/dispatches" \
+            -f ref=main \
+            --silent
