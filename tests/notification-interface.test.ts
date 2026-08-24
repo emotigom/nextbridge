@@ -24,6 +24,14 @@ describe("replaceable notification boundary", () => {
     expect(source).toContain("질문과 답변 내용은 보안을 위해 이메일에 포함하지 않았습니다.");
   });
 
+  it("records the participant delivery against the validated route question id", async () => {
+    const source = await readFile(
+      new URL("../supabase/functions/admin-questions/index.ts", import.meta.url),
+      "utf8"
+    );
+    expect(source).toContain("questionId,");
+  });
+
   it("keeps raw question text and participant contacts out of operator notifications", async () => {
     const source = await readFile(notificationUrl, "utf8");
     const operatorContract =

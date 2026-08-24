@@ -128,18 +128,24 @@ Deno.serve(async (request) => {
 
       if (
         updatedQuestion.previous_status !== "answered" &&
-        updatedQuestion.question_status === "answered" &&
-        updatedQuestion.participant_contact_method !== "none" &&
-        updatedQuestion.participant_contact_value
+        updatedQuestion.question_status === "answered"
       ) {
         try {
-          await notifyParticipant(admin, {
-            questionId: updatedQuestion.question_id,
-            receiptCode: updatedQuestion.question_receipt_code,
-            contactMethod: updatedQuestion.participant_contact_method,
-            contactValue: updatedQuestion.participant_contact_value,
-            eventSlug: parsed.data.eventSlug
-          });
+          const { data: participant } = await admin
+            .from("event_questions")
+            .select("receipt_code, contact_method, contact_value")
+            .eq("id", questionId)
+            .eq("event_slug", parsed.data.eventSlug)
+            .maybeSingle();
+          if (participant?.contact_method === "email" && participant.contact_value) {
+            await notifyParticipant(admin, {
+              questionId,
+              receiptCode: participant.receipt_code,
+              contactMethod: participant.contact_method,
+              contactValue: participant.contact_value,
+              eventSlug: parsed.data.eventSlug
+            });
+          }
         } catch {
           // The answer stays saved even when a completion notification fails.
         }
