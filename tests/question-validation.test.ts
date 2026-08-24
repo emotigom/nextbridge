@@ -30,35 +30,33 @@ describe("question validation", () => {
   });
 
   it("requires contact details only when a contact method is selected", () => {
-    const missing = { ...validDraft, contactMethod: "kakao", contactValue: "" };
+    const missing = { ...validDraft, contactMethod: "email", contactValue: "" };
     expect(validateQuestionDraft(missing).some((issue) => issue.field === "contactValue")).toBe(
       true
     );
     expect(submitQuestionSchema.safeParse(missing).success).toBe(false);
   });
 
-  it("rejects malformed email, phone, and oversized contact details", () => {
+  it("rejects malformed email, retired phone/Kakao options, and oversized contact details", () => {
     for (const draft of [
       { ...validDraft, contactMethod: "email", contactValue: "not-an-email" },
       { ...validDraft, contactMethod: "phone", contactValue: "phone please" },
       { ...validDraft, contactMethod: "kakao", contactValue: "kakao-id" },
       {
         ...validDraft,
-        contactMethod: "kakao",
+        contactMethod: "email",
         contactValue: "가".repeat(CONTACT_MAX_LENGTH + 1)
       }
     ]) {
-      expect(validateQuestionDraft(draft).some((issue) => issue.field === "contactValue")).toBe(
-        true
-      );
+      expect(validateQuestionDraft(draft).length).toBeGreaterThan(0);
       expect(submitQuestionSchema.safeParse(draft).success).toBe(false);
     }
   });
 
-  it("accepts a phone number for Kakao completion notifications", () => {
-    const kakao = { ...validDraft, contactMethod: "kakao", contactValue: "010-1234-5678" };
-    expect(validateQuestionDraft(kakao)).toEqual([]);
-    expect(submitQuestionSchema.safeParse(kakao).success).toBe(true);
+  it("accepts an email address for an answer-completion notification", () => {
+    const email = { ...validDraft, contactMethod: "email", contactValue: "answer@example.com" };
+    expect(validateQuestionDraft(email)).toEqual([]);
+    expect(submitQuestionSchema.safeParse(email).success).toBe(true);
   });
 
   it("requires acknowledgement of the sensitive-data warning", () => {
