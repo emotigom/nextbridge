@@ -10,7 +10,7 @@ const category = z.enum([
   "other"
 ]);
 
-const contactMethod = z.enum(["none", "email", "phone", "kakao"]);
+const contactMethod = z.enum(["none", "email"]);
 
 export const submitQuestionSchema = z
   .object({
@@ -42,16 +42,6 @@ export const submitQuestionSchema = z
         code: "custom",
         path: ["contactValue"],
         message: "이메일 형식을 확인해 주세요."
-      });
-    }
-    if (
-      (value.contactMethod === "phone" || value.contactMethod === "kakao") &&
-      !/^[0-9+\-()\s]{8,24}$/.test(value.contactValue)
-    ) {
-      context.addIssue({
-        code: "custom",
-        path: ["contactValue"],
-        message: "휴대전화번호 형식을 확인해 주세요."
       });
     }
   });

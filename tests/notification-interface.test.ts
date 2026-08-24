@@ -11,6 +11,19 @@ describe("replaceable notification boundary", () => {
     }
   });
 
+  it("uses Resend directly from Edge Functions and never exposes its key to the browser", async () => {
+    const source = await readFile(notificationUrl, "utf8");
+    expect(source).toContain('fetch("https://api.resend.com/emails"');
+    expect(source).toContain('optionalEnv("RESEND_API_KEY")');
+    expect(source).not.toContain("EMAIL_NOTIFICATION_RELAY_URL");
+  });
+
+  it("sends completion email only to a participant who selected email", async () => {
+    const source = await readFile(notificationUrl, "utf8");
+    expect(source).toContain('notification.contactMethod !== "email"');
+    expect(source).toContain("질문과 답변 내용은 보안을 위해 이메일에 포함하지 않았습니다.");
+  });
+
   it("keeps raw question text and participant contacts out of operator notifications", async () => {
     const source = await readFile(notificationUrl, "utf8");
     const operatorContract =
@@ -27,5 +40,7 @@ describe("replaceable notification boundary", () => {
     );
     expect(example).toContain("KAKAO_OPERATOR_RECIPIENTS_JSON=[]");
     expect(example).toContain("EMAIL_OPERATOR_RECIPIENTS_JSON=[]");
+    expect(example).toContain("RESEND_API_KEY=");
+    expect(example).toContain("RESEND_FROM_EMAIL=");
   });
 });

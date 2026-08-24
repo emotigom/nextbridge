@@ -65,29 +65,29 @@ const isOpen = isConnected && isPublished;
     </div>
 
     <fieldset class="contact-fields">
-      <legend>3. 연락받을 방법 <span>선택</span></legend>
+      <legend>3. 답변 알림 이메일 <span>선택</span></legend>
       <div class="form-grid">
         <div class="field">
-          <label for="contact-method">연락 방법</label>
+          <label for="contact-method">알림 방법</label>
           <select id="contact-method" name="contactMethod">
-            <option value="none">연락처 남기지 않음</option>
-            <option value="kakao">카카오톡</option>
-            <option value="phone">전화·문자</option>
-            <option value="email">이메일</option>
+            <option value="none">알림 이메일 받지 않음</option>
+            <option value="email">이메일로 답변 알림 받기</option>
           </select>
           <p class="field-error" data-error-for="contactMethod"></p>
         </div>
         <div class="field" data-contact-value-field hidden>
-          <label for="contact-value">연락처</label>
+          <label for="contact-value">이메일 주소</label>
           <input
             id="contact-value"
             name="contactValue"
-            type="text"
+            type="email"
             maxlength="160"
-            autocomplete="off"
-            placeholder="선택한 방법에 맞게 입력"
+            autocomplete="email"
+            placeholder="answer@example.com"
           />
-          <p class="field-help">답변 안내에 필요한 최소 정보만 입력해 주세요.</p>
+          <p class="field-help">
+            답변 완료 안내만 보내며, 질문과 답변 내용은 이메일에 넣지 않습니다.
+          </p>
           <p class="field-error" data-error-for="contactValue"></p>
         </div>
       </div>
@@ -183,13 +183,8 @@ const isOpen = isConnected && isPublished;
     const needsValue = contactMethod.value !== "none";
     contactValueField.hidden = !needsValue;
     contactValue.required = needsValue;
-    contactValue.inputMode = contactMethod.value === "email" ? "email" : "tel";
-    contactValue.placeholder =
-      contactMethod.value === "email"
-        ? "example@email.com"
-        : contactMethod.value === "kakao"
-          ? "카카오 알림을 받을 휴대전화번호"
-          : "연락받을 휴대전화번호";
+    contactValue.inputMode = "email";
+    contactValue.placeholder = "answer@example.com";
     if (!needsValue) contactValue.value = "";
   }
 

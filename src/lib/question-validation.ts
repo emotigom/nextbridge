@@ -12,7 +12,7 @@ export const questionCategories = [
   "other"
 ] as const;
 
-export const contactMethods = ["none", "email", "phone", "kakao"] as const;
+export const contactMethods = ["none", "email"] as const;
 
 export type QuestionCategory = (typeof questionCategories)[number];
 export type ContactMethod = (typeof contactMethods)[number];
@@ -74,12 +74,6 @@ export function validateQuestionDraft(draft: QuestionDraft): ValidationIssue[] {
   }
   if (draft.contactMethod === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactValue)) {
     issues.push({ field: "contactValue", message: "이메일 형식을 확인해 주세요." });
-  }
-  if (
-    (draft.contactMethod === "phone" || draft.contactMethod === "kakao") &&
-    !/^[0-9+\-()\s]{8,24}$/.test(contactValue)
-  ) {
-    issues.push({ field: "contactValue", message: "휴대전화번호 형식을 확인해 주세요." });
   }
   if (!draft.acknowledged) {
     issues.push({
