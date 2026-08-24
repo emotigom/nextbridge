@@ -7,7 +7,7 @@ Supabase 기반은 실제 프로젝트에 배포했고, 참가자에게 노출�
 - Supabase 조직: `emotigom's Org` (Free)
 - 프로젝트: `nextbridge-prod`, 서울(`ap-northeast-2`), 정상 상태
 - 적용 완료: 업무 테이블 6개, 전체 RLS 강제, 브라우저 역할 직접 권한 철회, Edge Function 3개
-- 안전 잠금: `2026-sk` 행사 `is_active = false`, 프런트 설정 `status: draft`, QR 상태 `verified`
+- 준비 완료와 안전 잠금: `2026-sk` 행사 `is_active = false`, 프런트 설정 `status: ready`, QR 상태 `verified`
 - 운영진: 승인된 owner 이메일 확인, 활성 `owner` 멤버십, 12자리 비밀번호 설정과 첫 정상 로그인 완료
 - Auth 반환 주소: `https://emotigom.github.io/nextbridge/admin/`
 - Turnstile: widget, 허용 출처, Edge Function secrets 4개, Pages 공개 빌드 값 연결 완료
@@ -18,7 +18,7 @@ Supabase 기반은 실제 프로젝트에 배포했고, 참가자에게 노출�
 
 ## 남은 결정과 작업
 
-1. **운영진 추가**: 예정된 운영자 2명을 최소 권한으로 초대하고 owner/operator/viewer 역할별 화면을 합동 확인.
+1. **운영 백업 권장**: 현재 활성 owner 1명으로 운영할 수 있으나 계정·기기 장애에 대비해 두 번째 운영자를 최소 권한으로 추가하는 것을 권장. 추가하지 못하면 행사 중 owner 로그인 기기와 복구 수단을 확보.
 2. **최종 인쇄 승인**: 필요한 iOS/Android와 Wi-Fi/모바일 데이터 교차 확인 후 QR을 `active`로 승격.
 3. **카카오 경로**: 추후 공식 알림톡 공급자 또는 기존 보안 relay, 발신 프로필, 승인 템플릿, 운영진 수신자와 참가자 완료 알림 허용 여부 결정.
 
@@ -34,8 +34,9 @@ Supabase 기반은 실제 프로젝트에 배포했고, 참가자에게 노출�
 4. GitHub Pages 체크포인트에 publishable 값만 설정하고 서버 부정 시험·실기기 정상 접수 종단 시험 — 완료
 5. 동적 QR SVG/PNG 생성, 해독 검증, Cloudflare `go` DNS·302 Single Redirect 구성 — 완료
 6. HTTPS·양쪽 경로·쿼리 제거·최종 응답과 운영자 휴대전화 카메라 스캔 — 완료, QR `verified`
-7. 필요한 교차 기기 검수와 최종 인쇄 승인 후 행사·QR production 승격
-8. 카카오 공식 알림톡 공급자 준비 후 relay/템플릿 연결 및 민감정보 미포함 확인
+7. 기술 검증 후 프런트를 `ready`로 승격 — 완료. 필요한 교차 기기 검수와 최종 인쇄 승인 후 QR을 `active`로 승격
+8. 행사 당일 운영자 로그인 확인 후 `2026-sk.is_active=true`로 백엔드를 준비하고, 이어서 프런트 `published` 배포로 질문 접수 개방
+9. 카카오 공식 알림톡 공급자 준비 후 relay/템플릿 연결 및 민감정보 미포함 확인
 
 ## 플랫폼별 비밀값 위치
 
