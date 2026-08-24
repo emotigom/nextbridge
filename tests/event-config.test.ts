@@ -33,8 +33,8 @@ describe("2026-sk event configuration", () => {
     expect(subjects).toContain("정보");
   });
 
-  it("keeps the event draft while marking the short-domain QR as verified", () => {
-    expect(event2026Sk.status).toBe("draft");
+  it("marks the event ready while keeping the short-domain QR at its verified gate", () => {
+    expect(event2026Sk.status).toBe("ready");
     expect(event2026Sk.qr.candidateShortUrl).toBe("https://go.gomdory.com/2026-sk");
     expect(event2026Sk.qr.status).toBe("verified");
   });
