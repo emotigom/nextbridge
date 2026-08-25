@@ -114,6 +114,7 @@ const isOpen = isConnected && isPublished;
             data-sitekey={turnstileSiteKey}
             data-theme="light"
             data-language="ko"
+            data-size="flexible"
             data-action="submit-question"
             data-refresh-expired="auto"
             data-retry="auto"
@@ -150,7 +151,15 @@ const isOpen = isConnected && isPublished;
 
 {
   turnstileSiteKey && (
-    <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />
+    <>
+      <script is:inline>
+        const questionTurnstile = document.getElementById("question-turnstile");
+        if (questionTurnstile && window.matchMedia("(max-width: 420px)").matches) {
+          questionTurnstile.dataset.size = "compact";
+        }
+      </script>
+      <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />
+    </>
   )
 }
 
