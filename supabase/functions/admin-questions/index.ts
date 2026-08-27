@@ -125,28 +125,50 @@ Deno.serve(async (request) => {
       }
       if (updateError || !updated) throw new Error("QUESTION_UPDATE_FAILED");
       const updatedQuestion = updated as UpdatedQuestion;
+      let notificationStatus = "not_requested";
+      let notificationErrorCode: string | null = null;
 
-      if (
-        updatedQuestion.previous_status !== "answered" &&
-        updatedQuestion.question_status === "answered"
-      ) {
+      if (updatedQuestion.question_status === "answered") {
         try {
-          const { data: participant } = await admin
-            .from("event_questions")
-            .select("receipt_code, contact_method, contact_value")
-            .eq("id", questionId)
-            .eq("event_slug", parsed.data.eventSlug)
+          const { data: sentDelivery, error: deliveryLookupError } = await admin
+            .from("question_notification_deliveries")
+            .select("id")
+            .eq("question_id", questionId)
+            .eq("kind", "participant_answered")
+            .eq("delivery_status", "sent")
+            .limit(1)
             .maybeSingle();
-          if (participant?.contact_method === "email" && participant.contact_value) {
-            await notifyParticipant(admin, {
-              questionId,
-              receiptCode: participant.receipt_code,
-              contactMethod: participant.contact_method,
-              contactValue: participant.contact_value,
-              eventSlug: parsed.data.eventSlug
-            });
+          if (deliveryLookupError) throw new Error("PARTICIPANT_DELIVERY_LOOKUP_FAILED");
+
+          if (sentDelivery) {
+            notificationStatus = "already_sent";
+          } else {
+            const { data: participant, error: participantLookupError } = await admin
+              .from("event_questions")
+              .select("receipt_code, contact_method, contact_value")
+              .eq("id", questionId)
+              .eq("event_slug", parsed.data.eventSlug)
+              .maybeSingle();
+            if (participantLookupError) throw new Error("PARTICIPANT_LOOKUP_FAILED");
+            if (participant?.contact_method === "email" && participant.contact_value) {
+              const result = await notifyParticipant(admin, {
+                questionId,
+                receiptCode: participant.receipt_code,
+                contactMethod: participant.contact_method,
+                contactValue: participant.contact_value,
+                eventSlug: parsed.data.eventSlug
+              });
+              notificationStatus = result.status;
+              notificationErrorCode = result.errorCode;
+            }
           }
-        } catch {
+        } catch (error) {
+          console.error(
+            "PARTICIPANT_NOTIFICATION_FAILED",
+            error instanceof Error ? error.message : "UNKNOWN"
+          );
+          notificationStatus = "failed";
+          notificationErrorCode = "NOTIFICATION_PROCESSING_FAILED";
           // The answer stays saved even when a completion notification fails.
         }
       }
@@ -155,7 +177,9 @@ Deno.serve(async (request) => {
         id: updatedQuestion.question_id,
         receiptCode: updatedQuestion.question_receipt_code,
         status: updatedQuestion.question_status,
-        updatedAt: updatedQuestion.question_updated_at
+        updatedAt: updatedQuestion.question_updated_at,
+        notificationStatus,
+        notificationErrorCode
       });
     }
 
