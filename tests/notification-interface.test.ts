@@ -24,12 +24,30 @@ describe("replaceable notification boundary", () => {
     expect(source).toContain("질문과 답변 내용은 보안을 위해 이메일에 포함하지 않았습니다.");
   });
 
+  it("normalizes common dashboard provider values before recording a delivery", async () => {
+    const source = await readFile(notificationUrl, "utf8");
+    expect(source).toContain('if (value === "resend") value = "email"');
+    expect(source).toContain("hasMatchingQuotes");
+    expect(source).toContain(
+      'channel: "none", status: "failed", errorCode: "UNSUPPORTED_PROVIDER"'
+    );
+  });
+
+  it("keeps the Resend HTTP status and fails loudly when delivery audit storage fails", async () => {
+    const source = await readFile(notificationUrl, "utf8");
+    expect(source).toContain("`HTTP_${response.status}`");
+    expect(source).toContain("NOTIFICATION_DELIVERY_RECORD_FAILED");
+  });
+
   it("records the participant delivery against the validated route question id", async () => {
     const source = await readFile(
       new URL("../supabase/functions/admin-questions/index.ts", import.meta.url),
       "utf8"
     );
     expect(source).toContain("questionId,");
+    expect(source).toContain('.eq("delivery_status", "sent")');
+    expect(source).toContain('notificationStatus = "already_sent"');
+    expect(source).toContain("notificationErrorCode");
   });
 
   it("keeps raw question text and participant contacts out of operator notifications", async () => {

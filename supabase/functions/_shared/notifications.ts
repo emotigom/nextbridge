@@ -3,6 +3,14 @@ import { optionalEnv } from "./env.ts";
 
 type NotificationChannel = "none" | "kakao_alimtalk" | "email" | "slack" | "discord";
 
+const notificationChannels = new Set<NotificationChannel>([
+  "none",
+  "kakao_alimtalk",
+  "email",
+  "slack",
+  "discord"
+]);
+
 interface OperatorNotification {
   questionId: string;
   receiptCode: string;
@@ -31,6 +39,18 @@ interface ProviderResult {
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const participantStatusUrl = "https://emotigom.github.io/nextbridge/questions/status/";
+
+function notificationChannelFromEnv(name: string): NotificationChannel | null {
+  let value = optionalEnv(name, "none").trim().toLowerCase();
+  const hasMatchingQuotes =
+    (value.startsWith('"') && value.endsWith('"')) ||
+    (value.startsWith("'") && value.endsWith("'"));
+  if (hasMatchingQuotes) value = value.slice(1, -1).trim();
+  if (value === "resend") value = "email";
+  return notificationChannels.has(value as NotificationChannel)
+    ? (value as NotificationChannel)
+    : null;
+}
 
 async function postJson(url: string, body: unknown, bearerToken = ""): Promise<boolean> {
   if (!url) return false;
@@ -76,7 +96,10 @@ async function sendResendEmail(input: {
       },
       body: JSON.stringify({ from, to: input.to, subject: input.subject, text: input.text })
     });
-    return { sent: response.ok, errorCode: response.ok ? null : "HTTP_FAILED" };
+    return {
+      sent: response.ok,
+      errorCode: response.ok ? null : `HTTP_${response.status}`
+    };
   } catch {
     return { sent: false, errorCode: "PROVIDER_ERROR" };
   }
@@ -85,7 +108,7 @@ async function sendResendEmail(input: {
 async function sendOperatorNotification(
   notification: OperatorNotification
 ): Promise<DeliveryResult> {
-  const channel = optionalEnv("OPERATOR_NOTIFICATION_PROVIDER", "none") as NotificationChannel;
+  const channel = notificationChannelFromEnv("OPERATOR_NOTIFICATION_PROVIDER");
   const text =
     "[Nextbridge] 새 질문 " +
     notification.receiptCode +
@@ -93,6 +116,7 @@ async function sendOperatorNotification(
     notification.category +
     " · " +
     notification.eventSlug;
+  if (!channel) return { channel: "none", status: "failed", errorCode: "UNSUPPORTED_PROVIDER" };
   try {
     if (channel === "none") return { channel, status: "skipped", errorCode: null };
     if (channel === "slack") {
@@ -139,7 +163,7 @@ async function sendOperatorNotification(
 async function sendParticipantNotification(
   notification: ParticipantNotification
 ): Promise<DeliveryResult> {
-  const channel = optionalEnv("PARTICIPANT_NOTIFICATION_PROVIDER", "none") as NotificationChannel;
+  const channel = notificationChannelFromEnv("PARTICIPANT_NOTIFICATION_PROVIDER");
   const message =
     "문의하신 질문의 답변이 완료되었습니다.\n\n" +
     "접수번호: " +
@@ -147,6 +171,7 @@ async function sendParticipantNotification(
     "\n답변 확인: " +
     participantStatusUrl +
     "\n\n질문과 답변 내용은 보안을 위해 이메일에 포함하지 않았습니다.";
+  if (!channel) return { channel: "none", status: "failed", errorCode: "UNSUPPORTED_PROVIDER" };
   try {
     if (channel === "none" || !notification.contactValue) {
       return { channel, status: "skipped", errorCode: null };
@@ -188,27 +213,32 @@ async function recordDelivery(
   kind: "operator_new_question" | "participant_answered",
   result: DeliveryResult
 ): Promise<void> {
-  await admin.from("question_notification_deliveries").insert({
+  const { error } = await admin.from("question_notification_deliveries").insert({
     question_id: questionId,
     kind,
     channel: result.channel,
     delivery_status: result.status,
     error_code: result.errorCode
   });
+  if (error) {
+    throw new Error(`NOTIFICATION_DELIVERY_RECORD_FAILED:${error.code ?? "UNKNOWN"}`);
+  }
 }
 
 export async function notifyOperators(
   admin: SupabaseClient,
   notification: OperatorNotification
-): Promise<void> {
+): Promise<DeliveryResult> {
   const result = await sendOperatorNotification(notification);
   await recordDelivery(admin, notification.questionId, "operator_new_question", result);
+  return result;
 }
 
 export async function notifyParticipant(
   admin: SupabaseClient,
   notification: ParticipantNotification
-): Promise<void> {
+): Promise<DeliveryResult> {
   const result = await sendParticipantNotification(notification);
   await recordDelivery(admin, notification.questionId, "participant_answered", result);
+  return result;
 }
