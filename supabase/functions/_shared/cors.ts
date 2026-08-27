@@ -40,9 +40,13 @@ export function jsonResponse(
     headers: {
       ...cors.headers,
       "Cache-Control": "no-store",
+      "Content-Security-Policy": "default-src 'none'; base-uri 'none'; frame-ancestors 'none'",
       "Content-Type": "application/json; charset=utf-8",
+      "Cross-Origin-Resource-Policy": "same-site",
+      "Permissions-Policy": "camera=(), geolocation=(), microphone=()",
       "Referrer-Policy": "no-referrer",
       "X-Content-Type-Options": "nosniff",
+      "X-Frame-Options": "DENY",
       ...extraHeaders
     }
   });

@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { fetchJson } from "@/lib/api-client";
 import {
   QUESTION_POLL_INTERVAL_MS,
   canEditQuestions,
@@ -308,8 +309,11 @@ async function api(path: string, init?: RequestInit): Promise<unknown> {
   headers.set("Content-Type", "application/json");
   headers.set("Authorization", "Bearer " + accessToken);
   const apiBase = consoleRoot?.dataset.apiBase ?? "";
-  const response = await fetch(apiBase.replace(/\/$/, "") + path, { ...init, headers });
-  const result: unknown = await response.json().catch(() => null);
+  const { response, data: result } = await fetchJson(
+    apiBase.replace(/\/$/, "") + path,
+    { ...init, headers },
+    20_000
+  );
   if (response.status === 401) {
     handleSessionExpired();
     throw new SessionExpiredError();

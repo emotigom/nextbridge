@@ -39,6 +39,17 @@ interface ProviderResult {
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const participantStatusUrl = "https://emotigom.github.io/nextbridge/questions/status/";
+const providerTimeoutMs = 10_000;
+
+async function fetchWithTimeout(input: string, init: RequestInit): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), providerTimeoutMs);
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
 
 function notificationChannelFromEnv(name: string): NotificationChannel | null {
   let value = optionalEnv(name, "none").trim().toLowerCase();
@@ -54,7 +65,7 @@ function notificationChannelFromEnv(name: string): NotificationChannel | null {
 
 async function postJson(url: string, body: unknown, bearerToken = ""): Promise<boolean> {
   if (!url) return false;
-  const response = await fetch(url, {
+  const response = await fetchWithTimeout(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -88,7 +99,7 @@ async function sendResendEmail(input: {
   if (!apiKey || !from) return { sent: false, errorCode: "NOT_CONFIGURED" };
 
   try {
-    const response = await fetch("https://api.resend.com/emails", {
+    const response = await fetchWithTimeout("https://api.resend.com/emails", {
       method: "POST",
       headers: {
         Authorization: "Bearer " + apiKey,
