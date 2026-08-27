@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "nextbridge-event-support-";
-const CACHE_VERSION = "v3";
+const CACHE_VERSION = "v4";
 const CACHE_NAME = CACHE_PREFIX + CACHE_VERSION;
 const APP_ROOT = new URL("./", self.location.href).href;
 const CORE_PAGES = ["", "schedule/", "rooms/", "visit/"].map(
@@ -11,6 +11,21 @@ const ONLINE_ONLY_PATHS = ["questions/", "admin/"].map(
 
 function isOnlineOnly(url) {
   return ONLINE_ONLY_PATHS.some((path) => url.pathname.startsWith(path));
+}
+
+function offlineNavigationResponse() {
+  return new Response(
+    `<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>인터넷 연결 확인</title><body style="margin:0;padding:40px 24px;font-family:system-ui,sans-serif;color:#073d3a;background:#f5fbfa"><main style="max-width:560px;margin:auto"><h1>인터넷 연결을 확인해 주세요.</h1><p>질문 접수, 답변 확인, 운영진 화면은 온라인에서만 이용할 수 있습니다.</p><p><a href="${APP_ROOT}" style="color:#0c4b96;font-weight:700">저장된 행사 안내 보기</a></p></main></body></html>`,
+    {
+      status: 503,
+      headers: {
+        "Cache-Control": "no-store",
+        "Content-Type": "text/html; charset=utf-8",
+        "Referrer-Policy": "no-referrer",
+        "X-Content-Type-Options": "nosniff"
+      }
+    }
+  );
 }
 
 async function cacheSuccessfulResponse(request, response) {
@@ -55,7 +70,7 @@ self.addEventListener("fetch", (event) => {
 
   if (request.mode === "navigate") {
     if (isOnlineOnly(url)) {
-      event.respondWith(fetch(request));
+      event.respondWith(fetch(request).catch(() => offlineNavigationResponse()));
       return;
     }
 

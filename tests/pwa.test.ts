@@ -27,13 +27,15 @@ describe("PWA structure", () => {
     const worker = await readFile(new URL("../public/sw.js", import.meta.url), "utf8");
 
     expect(worker).toContain('const CACHE_PREFIX = "nextbridge-event-support-"');
-    expect(worker).toContain('const CACHE_VERSION = "v3"');
+    expect(worker).toContain('const CACHE_VERSION = "v4"');
     for (const route of ['""', '"schedule/"', '"rooms/"', '"visit/"']) {
       expect(worker).toContain(route);
     }
     expect(worker).toContain("cache.addAll(CORE_PAGES)");
     expect(worker).toContain('["questions/", "admin/"]');
     expect(worker).toContain("isOnlineOnly(url)");
+    expect(worker).toContain("offlineNavigationResponse()");
+    expect(worker).toContain('"Cache-Control": "no-store"');
   });
 
   it("deletes only stale Nextbridge caches on the shared GitHub Pages origin", async () => {

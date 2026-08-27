@@ -56,6 +56,8 @@ const apiBase = import.meta.env.PUBLIC_QUESTION_API_BASE_URL ?? "";
 </section>
 
 <script>
+  import { fetchJson } from "@/lib/api-client";
+
   const panel = document.querySelector<HTMLElement>("[data-status-panel]");
   const form = panel?.querySelector<HTMLFormElement>("[data-status-form]");
   const input = form?.elements.namedItem("lookup") as HTMLInputElement | null;
@@ -142,16 +144,19 @@ const apiBase = import.meta.env.PUBLIC_QUESTION_API_BASE_URL ?? "";
     }
 
     try {
-      const response = await fetch(apiBase.replace(/\/$/, "") + "/question-status", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          eventSlug: panel?.dataset.eventSlug ?? "",
-          privateToken: token || undefined,
-          receiptCode: receiptCode || undefined
-        })
-      });
-      const result: unknown = await response.json();
+      const { response, data: result } = await fetchJson(
+        apiBase.replace(/\/$/, "") + "/question-status",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            eventSlug: panel?.dataset.eventSlug ?? "",
+            privateToken: token || undefined,
+            receiptCode: receiptCode || undefined
+          })
+        },
+        15_000
+      );
       if (
         !response.ok ||
         typeof result !== "object" ||

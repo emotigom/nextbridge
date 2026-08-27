@@ -164,6 +164,7 @@ const isOpen = isConnected && isPublished;
 }
 
 <script>
+  import { fetchJson } from "@/lib/api-client";
   import { validateQuestionDraft } from "@/lib/question-validation";
 
   const panel = document.querySelector<HTMLElement>("[data-question-panel]");
@@ -267,15 +268,18 @@ const isOpen = isConnected && isPublished;
       submit.textContent = "안전하게 접수하는 중…";
     }
     try {
-      const response = await fetch(apiBase.replace(/\/$/, "") + "/submit-question", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Idempotency-Key": submissionIdempotencyKey
+      const { response, data: result } = await fetchJson(
+        apiBase.replace(/\/$/, "") + "/submit-question",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Idempotency-Key": submissionIdempotencyKey
+          },
+          body: JSON.stringify(draft)
         },
-        body: JSON.stringify(draft)
-      });
-      const result: unknown = await response.json();
+        20_000
+      );
       if (
         !response.ok ||
         typeof result !== "object" ||

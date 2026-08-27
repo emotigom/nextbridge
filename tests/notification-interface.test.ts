@@ -13,9 +13,10 @@ describe("replaceable notification boundary", () => {
 
   it("uses Resend directly from Edge Functions and never exposes its key to the browser", async () => {
     const source = await readFile(notificationUrl, "utf8");
-    expect(source).toContain('fetch("https://api.resend.com/emails"');
+    expect(source).toContain('fetchWithTimeout("https://api.resend.com/emails"');
     expect(source).toContain('optionalEnv("RESEND_API_KEY")');
     expect(source).not.toContain("EMAIL_NOTIFICATION_RELAY_URL");
+    expect(source).toContain("const providerTimeoutMs = 10_000");
   });
 
   it("sends completion email only to a participant who selected email", async () => {

@@ -191,6 +191,22 @@ main {
   min-height: 70vh;
 }
 
+.network-status {
+  position: sticky;
+  z-index: 90;
+  top: 0;
+  padding: 10px 20px;
+  color: white;
+  background: #8b2f25;
+  font-size: 0.92rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.network-status[hidden] {
+  display: none;
+}
+
 .section-shell {
   width: min(calc(100% - 40px), var(--content-width));
   margin-inline: auto;
