@@ -19,6 +19,15 @@ describe("Turnstile submission boundary", () => {
     expect(source).toContain('panel?.dataset.eventOpen !== "true"');
   });
 
+  it("preserves answer lookup while hiding archived intake and its challenge widget", async () => {
+    const source = await readFile(formUrl, "utf8");
+    expect(source).toContain('activeEvent.status === "archived"');
+    expect(source).toContain("질문 접수가 종료되었습니다.");
+    expect(source).toContain('hidden={isArchived}');
+    expect(source).toContain('isOpen && turnstileSiteKey');
+    expect(source).toContain('href={statusPath}');
+  });
+
   it("validates tokens on the server with action and hostname checks", async () => {
     const source = await readFile(verifierUrl, "utf8");
     expect(source).toContain("/turnstile/v0/siteverify");

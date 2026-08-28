@@ -7,6 +7,7 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "";
 const statusPath = withBase("/questions/status/");
 const isConnected = Boolean(apiBase && turnstileSiteKey);
 const isPublished = activeEvent.status === "published";
+const isArchived = activeEvent.status === "archived";
 const isOpen = isConnected && isPublished;
 ---
 
@@ -29,11 +30,19 @@ const isOpen = isConnected && isPublished;
   {
     isConnected && !isPublished && (
       <div class="setup-banner" role="note">
-        <strong>질문 접수는 행사 기간에 열립니다.</strong>
+        {isArchived ? (
+          <>
+            <strong>질문 접수가 종료되었습니다.</strong>
+            <p>접수한 질문의 답변은 접수번호 또는 비공개 확인 링크로 계속 확인할 수 있습니다.</p>
+            <a class="closure-status-link" href={statusPath}>접수한 질문 확인</a>
+          </>
+        ) : (
+          <strong>질문 접수는 행사 기간에 열립니다.</strong>
+        )}
       </div>
     )
   }
-  <form class="question-form" data-question-form novalidate>
+  <form class="question-form" data-question-form novalidate hidden={isArchived}>
     <div class="field">
       <label for="question-category">1. 질문 유형</label>
       <select id="question-category" name="category" required>
@@ -107,7 +116,7 @@ const isOpen = isConnected && isPublished;
         <strong>4. 스팸 방지 확인</strong>
       </div>
       {
-        turnstileSiteKey ? (
+        isOpen && turnstileSiteKey ? (
           <div
             id="question-turnstile"
             class="cf-turnstile"
@@ -131,7 +140,7 @@ const isOpen = isConnected && isPublished;
       data-submit-question
       disabled={!isOpen}
     >
-      {isOpen ? "질문 접수하기" : "질문 접수 시작 전"}
+      {isOpen ? "질문 접수하기" : isArchived ? "질문 접수 종료" : "질문 접수 시작 전"}
     </button>
     <p class="form-status" role="status" aria-live="polite" data-form-status></p>
   </form>
@@ -150,7 +159,7 @@ const isOpen = isConnected && isPublished;
 </section>
 
 {
-  turnstileSiteKey && (
+  isOpen && turnstileSiteKey && (
     <>
       <script is:inline>
         const questionTurnstile = document.getElementById("question-turnstile");

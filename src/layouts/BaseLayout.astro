@@ -30,7 +30,8 @@ const apiBase = import.meta.env.PUBLIC_QUESTION_API_BASE_URL ?? "";
 const apiOrigin = apiBase ? new URL(apiBase).origin : "";
 const needsLiveConnection =
   currentPath.startsWith("/questions/") || currentPath.startsWith("/admin/");
-const needsTurnstile = Astro.url.pathname.endsWith("/questions/");
+const needsTurnstile =
+  activeEvent.status === "published" && Astro.url.pathname.endsWith("/questions/");
 const contentSecurityPolicy = [
   "default-src 'self'",
   "base-uri 'self'",
