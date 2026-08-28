@@ -1414,6 +1414,16 @@ main {
   line-height: 1.6;
 }
 
+.closure-status-link {
+  display: inline-flex;
+  margin-top: 12px;
+  color: var(--color-purple);
+  font-size: 0.9rem;
+  font-weight: 850;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .question-form,
 .status-form,
 .operator-login {
