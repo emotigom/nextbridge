@@ -1,26 +1,26 @@
 # 외부 연결 체크리스트
 
-Supabase 기반은 실제 프로젝트에 배포했고, 참가자에게 노출되는 연결은 안전 게이트를 통과할 때까지 잠가 두었습니다. Cloudflare 고정 주소와 QR 실기기 검증은 완료했으며, 알림은 운영자 Discord와 참가자 이메일만 사용합니다.
+Supabase 기반은 실제 프로젝트에 배포했고, Cloudflare 고정 주소와 QR 실기기 검증을 완료했습니다. 운영 기간에는 운영자 Discord와 참가자 이메일 알림을 사용했으며, 현재는 새 질문 접수를 종료하고 기존 답변 조회만 유지합니다.
 
 ## 현재 상태
 
 - Supabase 조직: `emotigom's Org` (Free)
 - 프로젝트: `nextbridge-prod`, 서울(`ap-northeast-2`), 정상 상태
 - 적용 완료: 업무 테이블 6개, 전체 RLS 강제, 브라우저 역할 직접 권한 철회, Edge Function 3개
-- 준비 완료와 안전 잠금: `2026-sk` 행사 `is_active = false`, 프런트 설정 `status: ready`, QR 상태 `verified`
+- 종료 상태: `2026-sk` 행사 `is_active = false`, 프런트 설정 `status: archived`, QR 상태 `verified`
 - 운영진: 승인된 owner 이메일 확인, 활성 `owner` 멤버십, 12자리 비밀번호 설정과 첫 정상 로그인 완료
 - Auth 반환 주소: `https://emotigom.github.io/nextbridge/admin/`
 - Turnstile: widget, 허용 출처, Edge Function secrets 4개, Pages 공개 빌드 값 연결 완료
-- 검증: 허용 출처 preflight `204`, 없는 질문 조회 `404`, 가짜 Turnstile 토큰 `TURNSTILE_REJECTED`; 실제 휴대전화에서 정상 접수·비공개 조회·운영진 처리 종단 시험 완료 후 시험 질문 삭제·접수 재잠금
+- 검증: 허용 출처 preflight `204`, 없는 질문 조회 `404`, 가짜 Turnstile 토큰 `TURNSTILE_REJECTED`; 실제 휴대전화 접수·비공개 조회·운영진 처리·참가자 이메일 종단 시험 완료, 종료 후 기존 기록 보존과 답변 조회 확인
 - Cloudflare: `gomdory.com` zone, proxied `go` DNS, `302` Single Redirect 활성; HTTPS·양쪽 경로·쿼리 제거·최종 `200` 확인
 - QR: SVG/PNG 생성·해독 검증과 운영자 휴대전화 카메라 스캔 완료
-- 알림: Edge Function 코드는 기본값 `none`으로 배포하며, Discord webhook과 Resend 발신 도메인·비밀값을 넣기 전에는 어떤 알림도 전송하지 않음
+- 알림: 운영자 Discord와 참가자 Resend 이메일 연결 및 실제 발송 확인 완료
 
-## 남은 결정과 작업
+## 종료 후 유지 사항
 
-1. **운영 백업 권장**: 현재 활성 owner 1명으로 운영할 수 있으나 계정·기기 장애에 대비해 두 번째 운영자를 최소 권한으로 추가하는 것을 권장. 추가하지 못하면 행사 중 owner 로그인 기기와 복구 수단을 확보.
-2. **최종 인쇄 승인**: 필요한 iOS/Android와 Wi-Fi/모바일 데이터 교차 확인 후 QR을 `active`로 승격.
-3. **알림 연결**: 아래 Discord와 Resend 설정을 완료한 뒤, 행사 개방 전 휴대전화로 새 질문·답변 완료 알림을 한 번씩 확인.
+1. 기존 접수번호와 비공개 링크의 답변 조회는 보존 기간을 결정할 때까지 유지합니다.
+2. 보존 기간이 끝나면 질문·연락처 내보내기 또는 삭제 범위를 별도로 검토합니다.
+3. 새 질문 접수를 다시 열 때만 데이터베이스와 프런트의 두 안전 게이트를 함께 활성화합니다.
 
 고정 주소는 `https://go.gomdory.com/2026-sk`입니다. QR에는 이 주소만 인코딩하고, 실제 목적지는 Cloudflare 리디렉션 규칙으로 관리합니다. QR 상태는 `verified`이며 최종 인쇄 승인 전까지 `active`로 올리지 않습니다.
 
@@ -52,9 +52,10 @@ Supabase 기반은 실제 프로젝트에 배포했고, 참가자에게 노출�
 4. GitHub Pages 체크포인트에 publishable 값만 설정하고 서버 부정 시험·실기기 정상 접수 종단 시험 — 완료
 5. 동적 QR SVG/PNG 생성, 해독 검증, Cloudflare `go` DNS·302 Single Redirect 구성 — 완료
 6. HTTPS·양쪽 경로·쿼리 제거·최종 응답과 운영자 휴대전화 카메라 스캔 — 완료, QR `verified`
-7. 기술 검증 후 프런트를 `ready`로 승격 — 완료. 필요한 교차 기기 검수와 최종 인쇄 승인 후 QR을 `active`로 승격
-8. 행사 당일 운영자 로그인 확인 후 `2026-sk.is_active=true`로 백엔드를 준비하고, 이어서 프런트 `published` 배포로 질문 접수 개방
-9. Discord·Resend Secrets를 넣고, 새 질문과 답변 완료 알림을 실제 휴대전화로 각각 한 번 검증
+7. 기술 검증 후 프런트를 `ready`로 승격 — 완료
+8. 운영자 로그인 확인 후 백엔드와 프런트의 두 안전 게이트로 질문 접수 개방 — 완료
+9. Discord·Resend 알림 실기기 검증 — 완료
+10. 질문 접수 종료, 프런트 `archived`·데이터베이스 `is_active=false` 전환과 기존 답변 조회 확인 — 완료
 
 ## 플랫폼별 비밀값 위치
 
