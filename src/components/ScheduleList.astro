@@ -8,12 +8,20 @@ interface Props {
 
 const { compact = false } = Astro.props;
 const days = compact ? activeEvent.schedule.slice(0, 1) : activeEvent.schedule;
+const saturdayDate = activeEvent.schedule[1]?.date ?? activeEvent.schedule[0]?.date ?? "";
+const sundayDate = activeEvent.schedule[2]?.date ?? saturdayDate;
+const initiallyOpenDate = compact ? (days[0]?.date ?? "") : saturdayDate;
 ---
 
-<div class="schedule-stack">
+<div
+  class="schedule-stack"
+  data-dynamic-schedule={!compact ? "true" : undefined}
+  data-saturday-date={!compact ? saturdayDate : undefined}
+  data-sunday-date={!compact ? sundayDate : undefined}
+>
   {
-    days.map((day, index) => (
-      <details class="schedule-day" open={index === 0}>
+    days.map((day) => (
+      <details class="schedule-day" data-schedule-date={day.date} open={day.date === initiallyOpenDate}>
         <summary>
           <span class="day-pill">{day.dayNumber}일차</span>
           <strong>{day.label.ko.split(" · ")[0]}</strong>
@@ -40,3 +48,48 @@ const days = compact ? activeEvent.schedule.slice(0, 1) : activeEvent.schedule;
     ))
   }
 </div>
+
+{
+  !compact && (
+    <script is:inline>
+      (() => {
+        const schedule = document.querySelector('[data-dynamic-schedule="true"]');
+        if (!(schedule instanceof HTMLElement)) return;
+
+        const saturdayDate = schedule.dataset.saturdayDate ?? "";
+        const sundayDate = schedule.dataset.sundayDate ?? saturdayDate;
+        const dateFormatter = new Intl.DateTimeFormat("en-US", {
+          timeZone: "Asia/Seoul",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit"
+        });
+
+        const dateKeyInSeoul = () => {
+          const parts = Object.fromEntries(
+            dateFormatter
+              .formatToParts(new Date())
+              .filter((part) => part.type !== "literal")
+              .map((part) => [part.type, part.value])
+          );
+          return `${parts.year}-${parts.month}-${parts.day}`;
+        };
+
+        const openCurrentDay = () => {
+          const targetDate = dateKeyInSeoul() >= sundayDate ? sundayDate : saturdayDate;
+          schedule.querySelectorAll("details[data-schedule-date]").forEach((details) => {
+            details.open = details.dataset.scheduleDate === targetDate;
+          });
+        };
+
+        openCurrentDay();
+
+        const sundayStart = Date.parse(`${sundayDate}T00:00:00+09:00`);
+        const delayUntilSunday = sundayStart - Date.now();
+        if (delayUntilSunday > 0 && delayUntilSunday <= 2_147_483_647) {
+          window.setTimeout(openCurrentDay, delayUntilSunday + 100);
+        }
+      })();
+    </script>
+  )
+}

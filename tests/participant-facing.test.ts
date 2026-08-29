@@ -100,6 +100,16 @@ describe("participant-facing event presentation", () => {
     expect(css).toContain(".route-button:active .ui-icon");
   });
 
+  it("opens Saturday by default and switches the default to Sunday in Seoul time", async () => {
+    const scheduleList = await readFile(scheduleListUrl, "utf8");
+
+    expect(scheduleList).toContain("open={day.date === initiallyOpenDate}");
+    expect(scheduleList).toContain('timeZone: "Asia/Seoul"');
+    expect(scheduleList).toContain("dateKeyInSeoul() >= sundayDate");
+    expect(scheduleList).toContain("T00:00:00+09:00");
+    expect(scheduleList).toContain("details.open = details.dataset.scheduleDate === targetDate");
+  });
+
   it("uses the supplied teal, blue, and mint palette without decorative artwork", async () => {
     const css = await readFile(stylesheetUrl, "utf8");
 
